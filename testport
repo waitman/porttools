@@ -1,0 +1,114 @@
+#!/bin/sh
+# Copyright (c) 2003, Sergei Kolobov
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# $Id$
+#
+PORTNAME=`make -V PORTNAME`
+PREFIX="/tmp/${PORTNAME}"
+PKG_DBDIR="/tmp/pkg_db"
+MESSAGE="===> $0: "
+
+# Parse command-line arguments
+while [ -n "$1" ]
+do
+	case "$1" in
+	-b)
+		# Build only
+		STOP="build"
+		;;
+	-i)
+		# Build and install
+		STOP="install"
+		;;
+	-p)
+		# Build, install and package
+		STOP="package"
+		;;
+	-c)
+		# Do NOT clean before 
+		NO_CLEAN_BEFORE="yes"
+		;;
+	-C)
+		# Do NOT clean after 
+		NO_CLEAN_AFTER="yes"
+		;;
+	--)
+		shift;
+		break;
+		;;
+	*)
+		echo "fatal: unrecognized option: $1"
+		exit 1
+		;;
+	esac
+	shift
+done
+
+# Display FLAGS
+FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
+echo "===> Test Port: FLAGS=${FLAGS}"
+
+# Start with a clean workspace
+if [ "${NO_CLEAN_BEFORE}" != "yes" ]
+then
+	echo "===> Test Port: Cleaning workspace"
+	make clean
+	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
+fi
+
+# Go through the build phases
+for PHASE in build install package deinstall
+do
+	SUDO="sudo"
+	if [ "${PHASE}" = "build" ]; then
+		SUDO=""
+	fi
+
+	${SUDO} make ${FLAGS} ${PHASE}
+	if [ $? -gt 0 ]; then
+		echo "===> Test Port: ERROR: ${PHASE}"
+		exit 1
+	fi
+
+	if [ "${PHASE}" = "${STOP}" ]
+	then
+		break
+	fi
+done
+
+# Check for extra files left
+echo "===> Test Port: Extra files check"
+find ${PREFIX} ! -type d
+
+# Start with a clean workspace
+if [ "${NO_CLEAN_AFTER}" != "yes" ]
+then
+	echo "===> Test Port: Cleaning up"
+	make clean
+	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
+fi
+
+echo "===> Test Port: Done."
+exit 0

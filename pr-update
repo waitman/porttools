@@ -1,0 +1,123 @@
+#!/bin/sh
+# Copyright (c) 2003, Sergei Kolobov
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# $Id$
+#
+ADDRESS="sergei@kolobov.com"
+PORTSDIR="${HOME}/ports"
+PR_TEMPLATE="${HOME}/.send-pr.template"
+MAINTAINER="`make -V MAINTAINER`"
+PORTNAME="`make -V PORTNAME`"
+PORTVERSION="`make -V PORTVERSION`"
+PKGNAME="`make -V PKGNAME`"
+CATEGORY="`make -V CATEGORIES | sed -E 's/^([^ ]+).*$/\1/'`"
+RELEASE="`uname -srp`"
+SYSTEM="`uname -a | cut -d ' ' -f 1-12`"
+
+if [ "${MAINTAINER}" = "${ADDRESS}" ]
+then
+	PREFIX="[MAINTAINER]"
+	CLASS="maintainer-update"
+	CC=""
+	CC_TEXT=""
+else
+	PREFIX="[PATCH]"
+	CLASS="update"
+	if [ "${MAINTAINER}" = "ports@FreeBSD.org" ]
+	then
+		CC=""
+		CC_TEXT=""
+	else
+		CC="${MAINTAINER}"
+		CC_TEXT="Port maintainer - ${MAINTAINER} - has been copied."
+	fi
+fi
+
+SYNOPSIS="${PREFIX} Update ${CATEGORY}/${PORTNAME} to ${PORTVERSION}"
+DESCRIPTION="- Update to ${PORTVERSION}"
+
+if [ ! -d CVS ]
+then
+	echo "No CVS subdir found, exiting"
+	exit 1
+fi
+
+echo "===> Updating from CVS"
+cvs update
+if [ $? -ne 0 ]
+then
+	echo "Error updating CVS"
+	exit 2
+fi
+
+echo "===> Generating patch against CVS"
+PATCH="${PORTSDIR}/${PKGNAME}.patch"
+cvs diff > ${PATCH}
+#if [ $? -ne 0 ]
+#then
+#	echo "Error generating patch"
+#	exit 3
+#fi
+
+echo "===> Creating temporary file for PR"
+TMPFILE="`mktemp -t pr-form`"
+if [ $? -ne 0 ]
+then
+	echo "Error creating temp file"
+	exit 4
+fi
+
+echo "===> Updating PR template"
+sed	-e "s!__SYNOPSIS__!${SYNOPSIS}!" \
+	-e "s!__CLASS__!${CLASS}!" \
+	-e "s!__RELEASE__!${RELEASE}!" \
+	-e "s!__SYSTEM__!${SYSTEM}!" \
+	-e "s!__DESCRIPTION__!${DESCRIPTION}!" \
+	-e "s!__CC__!${CC}!" \
+	-e "s!__CC_TEXT__!${CC_TEXT}!" \
+	${PR_TEMPLATE} > ${TMPFILE}
+if [ $? -ne 0 ]
+then
+	echo "Error updating PR template"
+	rm -f ${TMPFILE}
+	exit 5
+fi
+
+
+echo "===> Invoking send-pr to submit a PR"
+PR_FORM="${TMPFILE}" send-pr -a ${PATCH}
+if [ $? -ne 0 ]
+then
+	echo "Error submitting PR"
+	rm -f ${TMPFILE}
+	exit 6
+fi
+
+echo "===> Saving submitted PR, cleaning up"
+mv ${PATCH} ${PORTSDIR}/.Sent
+rm -f ${TMPFILE}
+
+echo "===> Done."
+exit 0

@@ -1,0 +1,4 @@
+- add configuration file 
+- run portlint before pr-{new,update} and testport
+
+$Id$

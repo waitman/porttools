@@ -1,0 +1,34 @@
+SEND-PR: -*- send-pr -*-
+SEND-PR: $Id$
+To: FreeBSD-gnats-submit@freebsd.org
+From: Sergei Kolobov <sergei@kolobov.com>
+Cc: __CC__
+X-send-pr-version: 3.113
+X-GNATS-Notify: 
+
+
+>Submitter-Id:	current-users
+>Originator:	Sergei Kolobov
+>Organization:	
+>Confidential:	no 
+>Synopsis:	__SYNOPSIS__
+>Severity:	non-critical 
+SEND-PR: 	[ non-critical | serious | critical ] 
+>Priority:	low
+SEND-PR: 	[ low | medium | high ]
+>Category:	ports 
+SEND-PR: <choose from the list of categories below (one line)>
+SEND-PR: advocacy  alpha     bin       conf      docs      gnu       
+SEND-PR: i386      ia64      java      kern      misc      ports     
+SEND-PR: powerpc   sparc64   standards www       
+>Class:		__CLASS__ 
+SEND-PR: [ sw-bug | doc-bug | change-request | update | maintainer-update ]
+>Release:	__RELEASE__
+>Environment:
+System: __SYSTEM__
+>Description:
+__DESCRIPTION__
+
+__CC_TEXT__
+>How-To-Repeat:
+>Fix:
