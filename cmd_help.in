@@ -8,12 +8,13 @@
 # Print synopsis
 echo "FreeBSD Port Tools __VERSION__"
 echo "Usage:	port <command> [<options>]"
-echo "Available commands"
+echo
+echo "Available commands:"
 
 # Print summary for each of the command scripts
 for script in ${SCRIPT_DIR}/cmd_*
 do
 	cmd=`echo ${script} | sed -e "s,${SCRIPT_DIR}/cmd_,,"`
 	summary=`awk '/^# SUMMARY: / { print(substr($0,12,72)) }' ${script}`
-	echo -e "\t${cmd}\t- ${summary}"
+	echo -e "${cmd}\t- ${summary}"
 done
