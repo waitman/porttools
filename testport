@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# FreeBSD Port Tools
+#
+# testport
+# Scripts to automate testing a new port or port update before submitting 
+# a FreeBSD Problem Report (PR)
+#
 # Copyright (c) 2003, Sergei Kolobov
 # All rights reserved.
 # 
@@ -25,10 +32,47 @@
 #
 # $Id$
 #
-PORTNAME=`make -V PORTNAME`
-PREFIX="/tmp/${PORTNAME}"
-PKG_DBDIR="/tmp/pkg_db"
-MESSAGE="===> $0: "
+
+# Port Tools configuration file
+CONFIG="${HOME}/.porttools"
+
+# Commands to output a message with standard prefix
+MSG='echo **> testport: '
+ERROR='echo testport: Error '
+
+# Run portlint(1) to validate port's sanity
+${MSG} "Validating port with portlint"
+PORTLINT_FLAGS="-abct"
+portlint ${PORTLINT_FLAGS}
+if [ $? -ne 0 ]
+then
+	${ERROR} "validating port"
+	exit 1
+fi
+
+# Check to see the config file exists; generate one if not
+if [ ! -f ${CONFIG} ]
+then
+	${MSG} "Generating ${CONFIG} configuration file"
+	cat > ${CONFIG} <<- EOF
+	# FreeBSD Port Tools configuration file
+	# See pr-update(1)
+	# vim: ft=sh
+	EMAIL="${USER}@`hostname`"
+	FULLNAME="`pw usershow -n ${USER} | cut -d: -f8`"
+	ORGANIZATION=""
+	BUILDROOT="/tmp"
+	ARCHIVE_DIR=""
+	EOF
+fi
+
+# Reading configuration file
+${MSG} "Reading configuration from ${CONFIG}"
+. ${CONFIG}
+
+# Collect information about the port
+PKGNAME="`make -V PKGNAME`"
+PREFIX="${BUILDROOT:-/tmp}/${PKGNAME}"
 
 # Parse command-line arguments
 while [ -n "$1" ]
@@ -66,14 +110,17 @@ do
 	shift
 done
 
+# Create a temporary dir for temporary package database
+PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
+
 # Display FLAGS
-FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
-echo "===> Test Port: FLAGS=${FLAGS}"
+PORT_FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
+${MSG} "flags: ${PORT_FLAGS}"
 
 # Start with a clean workspace
 if [ "${NO_CLEAN_BEFORE}" != "yes" ]
 then
-	echo "===> Test Port: Cleaning workspace"
+	${MSG} "Cleaning workspace before build"
 	make clean
 	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
 fi
@@ -86,9 +133,9 @@ do
 		SUDO=""
 	fi
 
-	${SUDO} make ${FLAGS} ${PHASE}
+	${SUDO} make ${PORT_FLAGS} ${PHASE}
 	if [ $? -gt 0 ]; then
-		echo "===> Test Port: ERROR: ${PHASE}"
+		${ERROR} "running make ${PHASE}"
 		exit 1
 	fi
 
@@ -99,16 +146,16 @@ do
 done
 
 # Check for extra files left
-echo "===> Test Port: Extra files check"
+${MSG} "Extra files check"
 find ${PREFIX} ! -type d
 
-# Start with a clean workspace
+# Finish with a clean workspace
 if [ "${NO_CLEAN_AFTER}" != "yes" ]
 then
-	echo "===> Test Port: Cleaning up"
+	${MSG} "Cleaning up after deinstall"
 	make clean
 	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
 fi
 
-echo "===> Test Port: Done."
+${MSG} "Done."
 exit 0
