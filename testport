@@ -37,7 +37,7 @@
 CONFIG="${HOME}/.porttools"
 
 # Commands to output a message with standard prefix
-MSG='echo **> testport: '
+MSG='echo ===> testport: '
 ERROR='echo testport: Error '
 
 # Run portlint(1) to validate port's sanity
@@ -122,7 +122,7 @@ if [ "${NO_CLEAN_BEFORE}" != "yes" ]
 then
 	${MSG} "Cleaning workspace before build"
 	make clean
-	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
+	sudo rm -rf ${PREFIX}
 fi
 
 # Go through the build phases
