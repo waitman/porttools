@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# FreeBSD Port Tools
+# FreeBSD Port Tools __VERSION__
 #
 # pr-update, pr-change, pr-new
 # Scripts to simplify submitting a FreeBSD Problem Report (PR)
@@ -39,21 +39,79 @@ CONFIG="${HOME}/.porttools"
 # Commands to output a message with standard prefix
 MSG='echo ===> '
 ERROR='echo Error '
+USAGE="Usage: $0 [-h] [-m new|change|update] [-s severity] [-p priority]"
 
-# Determine run mode (new/update/change) based on $0
-MODE="`basename $0`"
-case ${MODE} in
-	pr-new|pr-update|pr-change)
+# Initialize arguments to the default values
+MODE="`basename $0 | sed 's/pr-//'`"
+SEVERITY="non-critical"
+PRIORITY="low"
+
+# Parse command line arguments
+ARGS=`/usr/bin/getopt hm:s:p: $*`
+if [ $? != 0 ]
+then
+	echo "Error: invalid arguments"
+	echo ${USAGE}
+	exit 2
+fi
+
+set -- $ARGS
+for i 
+do
+	case "$i" in
+	-h)	# help
+		echo ${USAGE}
+		exit 0
 		;;
-	*)
-		${ERROR} "- unknown run mode: ${MODE}"
-		exit 1
-esac
+	-m)	# mode
+		MODE=$2
+		case "${MODE}" in
+		new|change|update)
+			shift
+			shift
+			;;
+		*)
+			echo "Error: invalid mode: ${MODE}"
+			echo "Valid values: new, change, update"
+			exit 2
+			;;
+		esac
+		;;
+	-s)	# severity
+		SEVERITY=$2
+		case "${SEVERITY}" in
+		non-critical|serious|critical)
+			shift
+			shift
+			;;
+		*)
+			echo "Error: invalid severity: ${SEVERITY}"
+			echo "Valid values: non-critical, serious, critical"
+			exit 2
+			;;
+		esac
+		;;
+	-p)	# prority
+		PRORITY=$2
+		case "${PRORITY}" in
+		low|medium|high)
+			shift
+			shift
+			;;
+		*)
+			echo "Error: invalid priority: ${PRIORITY}"
+			echo "Valid values: low, medium, high"
+			exit 2
+			;;
+		esac
+		;;
+	esac
+done
 
 # Run portlint(1) to validate port's sanity
 ${MSG} "Validating port with portlint"
 PORTLINT_FLAGS="-abct"
-if [ "${MODE}" = "pr-new" ]
+if [ "${MODE}" = "new" ]
 then
 	PORTLINT_FLAGS="${PORTLINT_FLAGS} -N"
 fi
@@ -106,7 +164,7 @@ fi
 
 # Set some variables depending on run-mode
 case ${MODE} in
-pr-new)
+new)
 	# Submitting a new port
 	NEW_PORT="yes"
 	CLASS="change-request"
@@ -115,14 +173,14 @@ pr-new)
 	DESCRIPTION=""
 	CC=""
 	;;
-pr-update)
+update)
 	# Submitting an update to a newer version of an existing port
 	CLASS="update"
 	PREFIX="PATCH"
 	SUFFIX="update to ${PORTVERSION}"
 	DESCRIPTION="- Update to ${PORTVERSION}"
 	;;
-pr-change)
+change)
 	# Submitting a change to an existing port
 	CLASS="change-request"
 	PREFIX="PATCH"
@@ -132,7 +190,7 @@ pr-change)
 esac
 
 # If you are the port maintainer, change prefix and PR class
-if [ "${MODE}" != "pr-new" -a "${MAINTAINER}" = "${EMAIL}" ]; then
+if [ "${MODE}" != "new" -a "${MAINTAINER}" = "${EMAIL}" ]; then
 	PREFIX="MAINTAINER"
 	CLASS="maintainer-update"
 fi
@@ -141,7 +199,7 @@ fi
 TEMPROOT="`mktemp -d -t ${MODE}`" || exit 1
 
 case ${MODE} in
-pr-new)
+new)
 	${MSG} "Creating shar file"
 	PATCH="${TEMPROOT}/${PKGNAME}.shar"
 	SAVE_CWD="`pwd`"
@@ -156,11 +214,11 @@ pr-new)
 	fi
 	cd ${SAVE_CWD}
 	;;
-pr-change|pr-update)
+change|update)
 	# Require a working copy of the port checked out of CVS
 	if [ ! -d CVS ]
 	then
-		${ERROR} "- No CVS subdir found, exiting"
+		echo "Error: no CVS subdir found"
 		rm -rf ${TEMPROOT}
 		exit 1
 	fi
@@ -170,7 +228,7 @@ pr-change|pr-update)
 
 	# Run 'cvs update' first
 	${MSG} "Updating from CVS"
-	cvs update
+	cvs update -Pd
 	if [ $? -ne 0 ]
 	then
 		${ERROR} "updating CVS"
@@ -181,7 +239,7 @@ pr-change|pr-update)
 	# Generate patch
 	${MSG} "Generating patch against CVS"
 	PATCH="${TEMPROOT}/${PKGNAME}.patch"
-	cvs diff > ${PATCH}
+	cvs diff -u > ${PATCH}
 	#if [ $? -ne 0 ]
 	#then
 	#	${ERROR} "generating patch"
@@ -193,8 +251,8 @@ pr-change|pr-update)
 	then
 		CLASS="update"
 		PREFIX="PATCH"
-		SUFFIX="take maintainership"
-		DESCRIPTION="- Take maintainership"
+		SUFFIX="${SUFFIX}, take maintainership"
+		DESCRIPTION="$DESCRIPTION}\n- Take maintainership"
 	fi
 	;;
 esac
@@ -206,7 +264,6 @@ ${MSG} "Generating PR form"
 PR_FORM="${TEMPROOT}/PR"
 cat > ${PR_FORM} << EOF
 SEND-PR: -*- send-pr -*-
-SEND-PR: Generated with FreeBSD Port Tools
 To: FreeBSD-gnats-submit@freebsd.org
 From: ${FULLNAME} <${EMAIL}>
 Cc: ${CC}
@@ -219,9 +276,9 @@ X-GNATS-Notify:
 >Organization:	${ORGANIZATION}
 >Confidential:	no 
 >Synopsis:	${SYNOPSIS}
->Severity:	${SEVERITY:-non-critical}
+>Severity:	${SEVERITY}
 SEND-PR: 	[ non-critical | serious | critical ] 
->Priority:	${PRIORITY:-low}
+>Priority:	${PRIORITY}
 SEND-PR: 	[ low | medium | high ]
 >Category:	ports 
 SEND-PR: <choose from the list of categories below (one line)>
@@ -237,7 +294,7 @@ System: ${SYSTEM}
 EOF
 
 case ${MODE} in
-pr-new)
+new)
 	cat pkg-descr >> ${PR_FORM}
 	;;
 *)
@@ -250,13 +307,15 @@ pr-new)
 esac
 
 cat >> ${PR_FORM} << EOF
+
+Generated with FreeBSD Port Tools __VERSION__
 >How-To-Repeat:
 >Fix:
 EOF
 
 # Invoke send-pr(1)
 ${MSG} "Invoking send-pr to submit a PR"
-PR_FORM="${PR_FORM}" send-pr -a "${PATCH}"
+PR_FORM="${PR_FORM}" /usr/bin/send-pr -a "${PATCH}"
 if [ $? -ne 0 ]
 then
 	${ERROR} "submitting PR"
