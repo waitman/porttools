@@ -11,16 +11,22 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the BSD
 License for more details.
 
-SUMMARY:
-========
+INTRODUCTION
+============
 
 FreeBSD Port Tools consist of the following small scripts:
 - testport: a script to automate testing a new port or a port update
 - pr-new: a script to simplify submitting a Problem Report (PR) for a new port
 - pr-update: a script to simplify submitting a PR with a port update
 
-BACKGROUND:
-===========
+NOTE: the Port Tools are currently in pre-alpha state. I would appreciate 
+any feedback, comments or suggestions for improvement. Patches are welcome.
+Contact me at <sergei@kolobov.com>.
+
+FreeBSD Port Tools are available at http://sourceforge.net/projects/porttools/.
+
+BACKGROUND
+==========
 
 I have submitted quite a few ports PR myself, and soon got tired of editing
 the default send-pr form to fill in the fields. So I first created my own
@@ -31,8 +37,11 @@ So I came up with these home-grown tools. I use them for several months now
 (approximately since November 2002) and find them quite useful for me.
 Hopefully, they could be useful for somebody else.
 
-DESCRIPTION:
-============
+See list of PRs submitted by me as an example what it looks like:
+http://www.freebsd.org/cgi/query-pr-summary.cgi?originator=kolobov&closedtoo=on
+
+DESCRIPTION
+===========
 
 A short description of each script is below.
 
@@ -59,15 +68,13 @@ testport also detects any files not listed in pkg-plist during
 
 testport accepts the following command-line options:
 
-testport [-bipcC] [--] [<knob(s)>]
+testport [-bipcC] [--] [<port knob(s)>]
 
 -b	stop after Build phase
 -i	stop after Install phase
 -p	stop after Package phase
-
 -c	do NOT run 'make clean' before the process (default to run 'make clean')
 -C	do NOT run 'make clean' after the process (default to run 'make clean')
-
 --	indicates the end of options (port's compile-time knobs follow).
 
 Examples:
@@ -77,7 +84,8 @@ testport -i -C
 	(I use to manually examine the installed files for correctness).
 
 testport -- NOPORTDOCS=yes
-	pass NOPORTDOCS=yes to all make phases
+	test port without installing documentation (i.e. pass NOPORTDOCS=yes to
+	all make phases)
 	(Note: you can list as many parameters as needed)
 
 pr-new
