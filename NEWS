@@ -1,3 +1,7 @@
+0.61, 2004-07-29
+- bugfix: port test: fix a typo - unclosed double quote
+- change: LICENSE: update copyright for year 2004
+
 0.60, 2004-07-29
 - add: port submit: new option: -c (committer check): adds "-c" to portlint(1)
   flags when checking the port for sanity before submitting 
