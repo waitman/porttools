@@ -12,6 +12,7 @@ DISTNAME=	${PORTNAME}-${PORTVERSION}
 
 SCRIPTS=	pr-update testport
 DOCS=		LICENSE NEWS README THANKS TODO 
+MAN1=		pr-change.1 pr-new.1 pr-update.1 testport.1
 
 ##
 ## Maintainer only
@@ -27,9 +28,10 @@ upload: ${DISTNAME}.tar.gz
 ${DISTNAME}.tar.gz: ${SCRIPTS} ${DOCS}
 	rm -rf ${DISTNAME}
 	mkdir ${DISTNAME}
-.for file in ${SCRIPTS} ${DOCS}
+.for file in ${SCRIPTS}
 	sed -e 's/__VERSION__/${PORTVERSION}/' ${file} > ${DISTNAME}/${file}
 .endfor
+	cp ${DOCS} ${MAN1} ${DISTNAME}
 	tar cvzf ${DISTNAME}.tar.gz ${DISTNAME}
 	rm -rf ${DISTNAME}
 
