@@ -1,4 +1,12 @@
-0.20 (27.07.2003)
+0.25, 2003-08-01
+- new: pr-update and friends now allow non-CVS diff generatin: 
+       -d <diffmode> flag (thanks, Jens and Sergey!)
+- bugfix: fixed incorrect config file name in manpages (thanks, Lars!)
+- change: testport and pr-update now print more detailed usage 
+          if -h option is given
+- change: added new contributors to THANKS
+
+0.20, 2003-07-27
 - change: the only supported method of installation is through devel/porttools
   port from now on; Makefile is no longer included with the distribution
 - new: added manpages
@@ -11,23 +19,23 @@
 - new: scripts now contain (and sometime display) the tools version number
 - bugfix: testport: do not check for extra files if $PREFIX does not exist
 
-0.16 (21.07.2003)
+0.16, 2003-07-21
 - bugfix: do not remove PKG_DBDIR in "clean before build phase:
           it cause failure when in install phase with new code
 	  in bsd.port.mk
 - cosmetique: change prefix in testport's output
 
-0.15 (14.07.2003)
+0.15, 2003-07-14
 - respect PKGNAMEPREFIX and PKGNAMESUFFIX in pr-* scripts (thanks, Tim!)
 - minor fixes/cleanups
 - added THANKS file to list contributors
 
-0.11 (08.07.2003)
+0.11, 2003-07-08
 - detect situations where maintainership change is requested, adjust
   PR form respectively
 - fix bug which prevented submitted patch to be saved in ${ARCHIVE_DIR}
 
-0.10 (25.06.2003)
+0.10, 2003-06-25
 - add configuration file (~/.porttools), generated automatically if it does not exist
 - pr-update, pr-change, pr-new are symlinks to a single script, mode detected based on $0
 - do not use send-pr.template anymore - instead, PR form is generated from by the script
@@ -37,8 +45,8 @@
 - testport: allow running several testport processes - use PREFIX=${BUILDROOT}/${PKGNAME}
   (instead of /tmp/${PORTNAME}) and mktemp(1)-ed PKG_DBDIR
 
-0.01 (18.06.2003)
+0.01, 2003-06-18
 - first public release
 
-November 2002
+0.00, 2002-11-??
 - initial implementation
