@@ -33,7 +33,6 @@ EOF
 RUN_PORTLINT="yes"
 CLEAN_BEFORE="yes"
 CLEAN_AFTER="yes"
-CLEAN_PREFIX="yes"
 
 # Parse command line arguments
 ARGS=`/usr/bin/getopt hlLbipcC $*`
@@ -104,17 +103,14 @@ PKGPLIST="`make -V PKGPLIST`"
 # Create a temporary dir for temporary package database
 PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
 
-# Do not attempt to clean up in PREFIX if installing into 
-# either LOCALBASE or X11BASE
+# Do not attempt to clean up in PREFIX if USE_X_PREFIX=yes
 LOCALBASE="`make -V LOCALBASE`"
-X11BASE="`make -V X11BASE`"
+USE_X_PREFIX="`make -V USE_X_PREFIX`"
 PREFIX="`make -V PREFIX`"
-if [ "${PREFIX}" = "${LOCALBASE}" -o "${PREFIX}" = "${X11BASE}" ]
+if [ "${USE_X_PREFIX}" != "yes" ]
 then
-	CLEAN_PREFIX="no"
-else
 	# Some ports fail to build if PREFIX contains commas 
-	# (mostly due to constructs like "sed -e 's,foo,bar')
+	# (mostly due to constructs like "sed -e 's,foo,bar'")
 	# or plus signs - remove those characters from generated PREFIX
 	PREFIX="${BUILDROOT:-/tmp}/`echo ${PKGNAME} | tr -d ',+'`"
 fi
@@ -128,7 +124,11 @@ if [ "${CLEAN_BEFORE}" = "yes" ]
 then
 	echo "===> Cleaning workspace before port test"
 	make clean
-	[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
+	if [ "${USE_X_PREFIX}" != "yes" -a -d ${PREFIX} ] 
+	then
+		echo "===>  Removing existing ${PREFIX} dir"
+ 		[ "${PREFIX}" != "${LOCALBASE}" ] && sudo rm -rf ${PREFIX}
+	fi
 fi
 
 # Go through the build phases
@@ -145,7 +145,7 @@ do
 
 		# XXX Dirty hack to avoid checking the whole
 		# LOCALBASE or X11BASE trees
-		if [ "${CLEAN_PREFIX}" = "yes" ]
+		if [ "${USE_X_PREFIX}" != "yes" ]
 		then
 			# Also check ldd(1) output on binaries
 			echo "===> Checking shared library dependencies"
@@ -164,7 +164,8 @@ do
 	if [ $? -gt 0 ]; then
 		echo "Error running make ${PHASE}"
 		echo "===> Cleaning up"
-		[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
+		[ "${USE_X_PREFIX}" != "yes" -a \
+		  "${PREFIX}" != "${LOCALBASE}" ] && sudo rm -rf ${PREFIX}
 		sudo rm -rf ${PKG_DBDIR}
 		exit 1
 	fi
@@ -174,7 +175,7 @@ done
 
 # Check for extra files left
 echo "===> Extra files check"
-if [ -d ${PREFIX} -a "${CLEAN_PREFIX}" = "yes" ]
+if [ -d ${PREFIX} -a "${USE_X_PREFIX}" != "yes" ]
 then
 	# Remove PREFIX from the extra files list
 	# XXX Dirty hack to hide these 2 files that always show up
@@ -188,7 +189,11 @@ if [ "${CLEAN_AFTER}" = "yes" ]
 then
 	echo "===> Cleaning up after port test"
 	make clean
-	[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
+	if [ "${USE_X_PREFIX}" != "yes" -a -d ${PREFIX} ] 
+	then
+		echo "===>  Removing existing ${PREFIX} dir"
+ 		[ "${PREFIX}" != "${LOCALBASE}" ] && sudo rm -rf ${PREFIX}
+	fi
 	sudo rm -rf ${PKG_DBDIR}
 fi
 
