@@ -67,10 +67,18 @@ install:
 	${INSTALL_DATA} ${DOCS} ${DOCSDIR}
 .endif
 
+##
+## Maintainer only
+##
+
 # Making a new release
-release:
+release: TODO
 	rm -rf ${DISTNAME}
 	mkdir ${DISTNAME}
 	cp ${DIST} ${DISTNAME}
 	tar cvzf ${DISTNAME}.tar.gz ${DISTNAME}
 	rm -rf ${DISTNAME}
+
+# Updating TODO
+TODO: .todo
+	devtodo --all --TODO
