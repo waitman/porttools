@@ -1,7 +1,15 @@
 0.63, 2004-08-07
+- new: port test: add NO_DEPENDS=yes to the port test flags to prevent
+  installation of dependencies into the temporary PREFIX dir
+- change: port test: optimize shared library dependency search algorithm
+  by only searching for files listed in the package's plist
+- new: port test: if 'make package' phase fails (most often because of
+  stale files listed in pkg-plist which are no longer installed) display
+  a list currently installed in the PREFIX before cleaning up
 - cosmetique: change man pages to my FreeBSD.org e-mail address
 - cosmetique: change copyright in README for year 2004
 - cosmetique: modify output of help command, fix wrapping
+- cosmetique: port submit: shorten SUMMARY line to fit in 80 columns
 
 0.62, 2004-07-29
 - bugfix: port test: fix logic to generate an unique PREFIX
