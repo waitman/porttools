@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# FreeBSD Port Tools
+#
+# pr-update, pr-change, pr-new
+# Scripts to simplify submitting a FreeBSD Problem Report (PR)
+# for updated, changed, or new port
+#
 # Copyright (c) 2003, Sergei Kolobov
 # All rights reserved.
 # 
@@ -25,99 +32,238 @@
 #
 # $Id$
 #
-ADDRESS="sergei@kolobov.com"
-PORTSDIR="${HOME}/ports"
-PR_TEMPLATE="${HOME}/.send-pr.template"
-MAINTAINER="`make -V MAINTAINER`"
+
+# Port Tools configuration file
+CONFIG="${HOME}/.porttools"
+
+# Commands to output a message with standard prefix
+MSG='echo ===> '
+ERROR='echo Error '
+
+# Determine run mode (new/update/change) based on $0
+MODE="`basename $0`"
+case ${MODE} in
+	pr-new|pr-update|pr-change)
+		;;
+	*)
+		${ERROR} "- unknown run mode: ${MODE}"
+		exit 1
+esac
+
+# Run portlint(1) to validate port's sanity
+${MSG} "Validating port with portlint"
+PORTLINT_FLAGS="-abct"
+if [ "${MODE}" = "pr-new" ]
+then
+	PORTLINT_FLAGS="${PORTLINT_FLAGS} -N"
+fi
+portlint ${PORTLINT_FLAGS}
+if [ $? -ne 0 ]
+then
+	${ERROR} "validating port"
+	exit 1
+fi
+
+# Check to see the config file exists; generate one if not
+if [ ! -f ${CONFIG} ]
+then
+	${MSG} "Generating ${CONFIG} configuration file"
+	cat > ${CONFIG} <<- EOF
+	# FreeBSD Port Tools configuration file
+	# See pr-update(1)
+	# vim: ft=sh
+	EMAIL="${USER}@`hostname`"
+	FULLNAME="`pw usershow -n ${USER} | cut -d: -f8`"
+	ORGANIZATION=""
+	BUILDROOT="/tmp"
+	ARCHIVE_DIR=""
+	EOF
+fi
+
+# Reading configuration file
+${MSG} "Reading configuration from ${CONFIG}"
+. ${CONFIG}
+
+# Collect information about the port
 PORTNAME="`make -V PORTNAME`"
 PORTVERSION="`make -V PORTVERSION`"
 PKGNAME="`make -V PKGNAME`"
 CATEGORY="`make -V CATEGORIES | sed -E 's/^([^ ]+).*$/\1/'`"
+MAINTAINER="`make -V MAINTAINER`"
+COMMENT="`make -V COMMENT`"
+
+# Collect information about the local system
 RELEASE="`uname -srp`"
 SYSTEM="`uname -a | cut -d ' ' -f 1-12`"
 
-if [ "${MAINTAINER}" = "${ADDRESS}" ]
-then
-	PREFIX="[MAINTAINER]"
-	CLASS="maintainer-update"
+# Notify the port maintainer
+CC="${MAINTAINER}"
+
+# Do not CC yourself or freebsd-ports list
+if [ "${CC}" = "${EMAIL}" -o "${CC}" = "ports@FreeBSD.org" ]; then
 	CC=""
-	CC_TEXT=""
-else
-	PREFIX="[PATCH]"
-	CLASS="update"
-	if [ "${MAINTAINER}" = "ports@FreeBSD.org" ]
-	then
-		CC=""
-		CC_TEXT=""
-	else
-		CC="${MAINTAINER}"
-		CC_TEXT="Port maintainer - ${MAINTAINER} - has been copied."
-	fi
 fi
 
-SYNOPSIS="${PREFIX} Update ${CATEGORY}/${PORTNAME} to ${PORTVERSION}"
-DESCRIPTION="- Update to ${PORTVERSION}"
+# Set some variables depending on run-mode
+case ${MODE} in
+pr-new)
+	# Submitting a new port
+	NEW_PORT="yes"
+	CLASS="change-request"
+	PREFIX="NEW PORT"
+	SUFFIX="${COMMENT}"
+	DESCRIPTION=""
+	CC=""
+	;;
+pr-update)
+	# Submitting an update to a newer version of an existing port
+	CLASS="update"
+	PREFIX="PATCH"
+	SUFFIX="update to ${PORTVERSION}"
+	DESCRIPTION="- Update to ${PORTVERSION}"
+	;;
+pr-change)
+	# Submitting a change to an existing port
+	CLASS="change-request"
+	PREFIX="PATCH"
+	SUFFIX="[SUMMARIZE CHANGES]"
+	DESCRIPTION="[DESCRIBE CHANGES]"
+	;;
+esac
 
-if [ ! -d CVS ]
+# If you are the port maintainer, change prefix and PR class
+if [ "${MODE}" != "pr-new" -a "${MAINTAINER}" = "${EMAIL}" ]; then
+	PREFIX="MAINTAINER"
+	CLASS="maintainer-update"
+fi
+
+# Generate Synopsis line
+SYNOPSIS="[${PREFIX}] ${CATEGORY}/${PORTNAME}: ${SUFFIX}"
+
+# Create a temporary dir for generated files (patch/shar, PR form)
+TEMPROOT="`mktemp -d -t ${MODE}`" || exit 1
+
+case ${MODE} in
+pr-new)
+	${MSG} "Creating shar file"
+	PATCH="${TEMPROOT}/${PORTNAME}.shar"
+	cd ..
+	shar `find ${PORTNAME}` > ${PATCH}
+	if [ $? -ne 0 ]
+	then
+		${ERROR} "generating patch"
+		exit 1
+	fi
+	cd ${PORTNAME}
+	;;
+pr-change|pr-update)
+	# Require a working copy of the port checked out of CVS
+	if [ ! -d CVS ]
+	then
+		${ERROR} "- No CVS subdir found, exiting"
+		exit 1
+	fi
+
+	# Test for ~/.cvspass and create if necessary
+	test -f ${HOME}/.cvspass || touch ${HOME}/.cvspass
+
+	# Run 'cvs update' first
+	${MSG} "Updating from CVS"
+	cvs update
+	if [ $? -ne 0 ]
+	then
+		${ERROR} "updating CVS"
+		exit 1
+	fi
+
+	# Generate patch
+	${MSG} "Generating patch against CVS"
+	PATCH="${TEMPROOT}/${PKGNAME}.patch"
+	cvs diff > ${PATCH}
+	#if [ $? -ne 0 ]
+	#then
+	#	${ERROR} "generating patch"
+	#	exit 1
+	#fi
+	;;
+esac
+
+${MSG} "Creating temporary file for PR"
+TMPFILE="${TEMPROOT}/PR"
+if [ $? -ne 0 ]
 then
-	echo "No CVS subdir found, exiting"
+	${ERROR} "generating temporary file name"
 	exit 1
 fi
 
-echo "===> Updating from CVS"
-cvs update
-if [ $? -ne 0 ]
-then
-	echo "Error updating CVS"
-	exit 2
-fi
-
-echo "===> Generating patch against CVS"
-PATCH="${PORTSDIR}/${PKGNAME}.patch"
-cvs diff > ${PATCH}
-#if [ $? -ne 0 ]
-#then
-#	echo "Error generating patch"
-#	exit 3
-#fi
-
-echo "===> Creating temporary file for PR"
-TMPFILE="`mktemp -t pr-form`"
-if [ $? -ne 0 ]
-then
-	echo "Error creating temp file"
-	exit 4
-fi
-
-echo "===> Updating PR template"
-sed	-e "s!__SYNOPSIS__!${SYNOPSIS}!" \
-	-e "s!__CLASS__!${CLASS}!" \
-	-e "s!__RELEASE__!${RELEASE}!" \
-	-e "s!__SYSTEM__!${SYSTEM}!" \
-	-e "s!__DESCRIPTION__!${DESCRIPTION}!" \
-	-e "s!__CC__!${CC}!" \
-	-e "s!__CC_TEXT__!${CC_TEXT}!" \
-	${PR_TEMPLATE} > ${TMPFILE}
-if [ $? -ne 0 ]
-then
-	echo "Error updating PR template"
-	rm -f ${TMPFILE}
-	exit 5
-fi
+${MSG} "Generating PR form"
+cat > ${TMPFILE} << EOF
+SEND-PR: -*- send-pr -*-
+SEND-PR: Generated with FreeBSD Port Tools
+To: FreeBSD-gnats-submit@freebsd.org
+From: ${FULLNAME} <${EMAIL}>
+Cc: ${CC}
+X-send-pr-version: 3.113
+X-GNATS-Notify: 
 
 
-echo "===> Invoking send-pr to submit a PR"
+>Submitter-Id:	current-users
+>Originator:	${FULLNAME}
+>Organization:	${ORGANIZATION}
+>Confidential:	no 
+>Synopsis:	${SYNOPSIS}
+>Severity:	${SEVERITY:-non-critical}
+SEND-PR: 	[ non-critical | serious | critical ] 
+>Priority:	${PRIORITY:-low}
+SEND-PR: 	[ low | medium | high ]
+>Category:	ports 
+SEND-PR: <choose from the list of categories below (one line)>
+SEND-PR: advocacy  alpha     bin       conf      docs      gnu       
+SEND-PR: i386      ia64      java      kern      misc      ports     
+SEND-PR: powerpc   sparc64   standards www       
+>Class:		${CLASS}
+SEND-PR: [ sw-bug | doc-bug | change-request | update | maintainer-update ]
+>Release:	${RELEASE}
+>Environment:
+System: ${SYSTEM}
+>Description:
+EOF
+
+case ${MODE} in
+pr-new)
+	cat pkg-descr >> ${TMPFILE}
+	;;
+*)
+	echo ${DESCRIPTION} >> ${TMPFILE}
+	if [ "${CC}" != "" ]
+	then
+		echo >> ${TMPFILE}
+		echo "Port maintainer (${MAINTAINER}) is cc'd." >> ${TMPFILE}
+	fi
+esac
+
+cat >> ${TMPFILE} << EOF
+>How-To-Repeat:
+>Fix:
+EOF
+
+# Invoke send-pr(1)
+${MSG} "Invoking send-pr to submit a PR"
 PR_FORM="${TMPFILE}" send-pr -a ${PATCH}
 if [ $? -ne 0 ]
 then
-	echo "Error submitting PR"
-	rm -f ${TMPFILE}
-	exit 6
+	${ERROR} "submitting PR"
+	rm -rf ${TEMPROOT} ${TMPDIR:-/tmp}/pbad.*
+	exit 1
 fi
 
-echo "===> Saving submitted PR, cleaning up"
-mv ${PATCH} ${PORTSDIR}/.Sent
-rm -f ${TMPFILE}
+# Cleanup
+${MSG} "Saving submitted PR, cleaning up"
+if [ -n ${ARCHIVE_DIR} -a -d ${ARCHIVE_DIR} ]
+then
+	mv ${PATCH} ${PORTSDIR}/.Sent
+fi
+rm -rf ${TEMPROOT}
 
-echo "===> Done."
+${MSG} "Done"
 exit 0
