@@ -137,9 +137,6 @@ if [ "${MODE}" != "pr-new" -a "${MAINTAINER}" = "${EMAIL}" ]; then
 	CLASS="maintainer-update"
 fi
 
-# Generate Synopsis line
-SYNOPSIS="[${PREFIX}] ${CATEGORY}/${PORTNAME}: ${SUFFIX}"
-
 # Create a temporary dir for generated files (patch/shar, PR form)
 TEMPROOT="`mktemp -d -t ${MODE}`" || exit 1
 
@@ -185,8 +182,20 @@ pr-change|pr-update)
 	#	${ERROR} "generating patch"
 	#	exit 1
 	#fi
+
+	MAINT_CHANGE="`grep '^[+-]MAINTAINER=' ${PATCH} | wc -l`"
+	if [ ${MAINT_CHANGE} -eq 2 ]
+	then
+		CLASS="update"
+		PREFIX="PATCH"
+		SUFFIX="take maintainership"
+		DESCRIPTION="- Take maintainership"
+	fi
 	;;
 esac
+
+# Generate Synopsis line
+SYNOPSIS="[${PREFIX}] ${CATEGORY}/${PORTNAME}: ${SUFFIX}"
 
 ${MSG} "Creating temporary file for PR"
 TMPFILE="${TEMPROOT}/PR"
@@ -261,7 +270,7 @@ fi
 ${MSG} "Saving submitted PR, cleaning up"
 if [ -n ${ARCHIVE_DIR} -a -d ${ARCHIVE_DIR} ]
 then
-	mv ${PATCH} ${PORTSDIR}/.Sent
+	mv ${PATCH} ${ARCHIVE_DIR}
 fi
 rm -rf ${TEMPROOT}
 
