@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# FreeBSD Port Tools
+# FreeBSD Port Tools __VERSION__
 #
 # testport
 # Scripts to automate testing a new port or port update before submitting 
@@ -39,15 +39,73 @@ CONFIG="${HOME}/.porttools"
 # Commands to output a message with standard prefix
 MSG='echo ===> testport: '
 ERROR='echo testport: Error '
+USAGE="Usage: testport [-h ] [-lLbipdcC]"
+
+# Defaults
+RUN_PORTLINT="yes"
+CLEAN_BEFORE="yes"
+CLEAN_AFTER="yes"
+
+# Parse command line arguments
+ARGS=`/usr/bin/getopt hbipdBIPDcClL $*`
+if [ $? != 0 ]
+then
+	echo "Error: invalid arguments"
+	echo ${USAGE}
+	exit 2
+fi
+
+set -- $ARGS
+for i 
+do
+	case "$i" in
+	-h)	# help
+		echo ${USAGE}
+		exit 0
+		;;
+	-l)	# run portlint(1) only
+		STOP="lint"
+		;;
+	-L)	# do NOT run portlint(1)
+		RUN_PORTLINT="no"
+		;;
+	-b)	# stop after build phase
+		STOP="build"
+		;;
+	-i)	# stop after install phase
+		STOP="install"
+		;;
+	-p) 	# stop after package phase
+		STOP="package"
+		;;
+	-d)	# stop after deinstall phase
+		STOP="deinstall"
+		;;
+	-c)	# Do NOT clean before 
+		CLEAN_BEFORE="no"
+		;;
+	-C)	# Do NOT clean after 
+		CLEAN_AFTER="no"
+		;;
+	--)	# End of option list
+		shift
+		break;
+		;;
+	esac
+done
 
 # Run portlint(1) to validate port's sanity
-${MSG} "Validating port with portlint"
-PORTLINT_FLAGS="-abct"
-portlint ${PORTLINT_FLAGS}
-if [ $? -ne 0 ]
+if [ "${RUN_PORTLINT}" = "yes" ]
 then
-	${ERROR} "validating port"
-	exit 1
+	${MSG} "Validating port with portlint"
+	PORTLINT_FLAGS="-abct"
+	portlint ${PORTLINT_FLAGS}
+	if [ $? -ne 0 ]
+	then
+		${ERROR} "validating port"
+		exit 1
+	fi
+	[ "${STOP}" = "lint" ] && exit 0
 fi
 
 # Check to see the config file exists; generate one if not
@@ -74,42 +132,6 @@ ${MSG} "Reading configuration from ${CONFIG}"
 PKGNAME="`make -V PKGNAME`"
 PREFIX="${BUILDROOT:-/tmp}/${PKGNAME}"
 
-# Parse command-line arguments
-while [ -n "$1" ]
-do
-	case "$1" in
-	-b)
-		# Build only
-		STOP="build"
-		;;
-	-i)
-		# Build and install
-		STOP="install"
-		;;
-	-p)
-		# Build, install and package
-		STOP="package"
-		;;
-	-c)
-		# Do NOT clean before 
-		NO_CLEAN_BEFORE="yes"
-		;;
-	-C)
-		# Do NOT clean after 
-		NO_CLEAN_AFTER="yes"
-		;;
-	--)
-		shift;
-		break;
-		;;
-	*)
-		echo "fatal: unrecognized option: $1"
-		exit 1
-		;;
-	esac
-	shift
-done
-
 # Create a temporary dir for temporary package database
 PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
 
@@ -118,9 +140,9 @@ PORT_FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
 ${MSG} "flags: ${PORT_FLAGS}"
 
 # Start with a clean workspace
-if [ "${NO_CLEAN_BEFORE}" != "yes" ]
+if [ "${CLEAN_BEFORE}" = "yes" ]
 then
-	${MSG} "Cleaning workspace before build"
+	${MSG} "Cleaning workspace before testport"
 	make clean
 	sudo rm -rf ${PREFIX}
 fi
@@ -129,9 +151,7 @@ fi
 for PHASE in build install package deinstall
 do
 	SUDO="sudo"
-	if [ "${PHASE}" = "build" ]; then
-		SUDO=""
-	fi
+	[ "${PHASE}" = "build" ] && SUDO=""
 
 	${SUDO} make ${PORT_FLAGS} ${PHASE}
 	if [ $? -gt 0 ]; then
@@ -139,20 +159,20 @@ do
 		exit 1
 	fi
 
-	if [ "${PHASE}" = "${STOP}" ]
-	then
-		break
-	fi
+	[ "${PHASE}" = "${STOP}" ] && break
 done
 
 # Check for extra files left
 ${MSG} "Extra files check"
-find ${PREFIX} ! -type d
+if [ -d ${PREFIX} ]
+then
+	find ${PREFIX} ! -type d
+fi
 
 # Finish with a clean workspace
-if [ "${NO_CLEAN_AFTER}" != "yes" ]
+if [ "${CLEAN_AFTER}" = "yes" ]
 then
-	${MSG} "Cleaning up after deinstall"
+	${MSG} "Cleaning up after testport"
 	make clean
 	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
 fi
