@@ -277,8 +277,20 @@ then
 else
 	echo -e ${DESCRIPTION} >> ${PR_FORM}
 
-	# Check for added files
-	FILES_ADD=`grep --after-context=1 "^--- /dev/null" ${PATCH} | grep "^+++ " | awk '{print $2;}'`
+	# Get list of added/removed files
+	if [ "${DIFF_MODE}" = "CVS" ]
+	then
+		FILES_ADD=`grep --after-context=1 "^--- /dev/null" ${PATCH} | grep "^+++ " | awk '{print $2;}'`
+		FILES_DEL=`grep --before-context=1 "^+++ /dev/null" ${PATCH} | grep "^--- " | awk '{print $2;}'`
+	else
+		TEMP=`mktemp -t porttools` || exit 1
+		find -s ${ORIG_DIR} -type f | sed -e "s#${ORIG_DIR}/##" > ${TEMP}
+		CURR_DIR=`pwd`
+		FILES_ADD=`find -s ${CURR_DIR} -type f | sed -e "s#${CURR_DIR}/##" | comm -23 - ${TEMP}`
+		FILES_DEL=`find -s ${CURR_DIR} -type f | sed -e "s#${CURR_DIR}/##" | comm -13 - ${TEMP}`
+		rm -f ${TEMP}
+	fi
+
 	if [ -n "${FILES_ADD}" ]
 	then
 		echo "" >> ${PR_FORM}	
@@ -289,13 +301,11 @@ else
 		done
 	fi
 
-	# Check for removed files
-	FILES_ADD=`grep --before-context=1 "^+++ /dev/null" ${PATCH} | grep "^--- " | awk '{print $2;}'`
-	if [ -n "${FILES_ADD}" ]
+	if [ -n "${FILES_DEL}" ]
 	then
 		echo "" >> ${PR_FORM}	
 		echo "Removed file(s):" >> ${PR_FORM}	
-		for file in ${FILES_ADD}
+		for file in ${FILES_DEL}
 		do
 			echo "- ${file}" >> ${PR_FORM}
 		done
