@@ -109,8 +109,8 @@ then generates a shar file.
 The
 .Nm
 command uses the following environment variables,
-normally sets through the 
-.Pa ~/.porttoolsrc
+normally set through the 
+.Pa ~/.porttools
 configuration file:
 .Bl -tag -width ORGANIZATION
 .It Ev EMAIL
@@ -119,17 +119,12 @@ Your e-mail address to use in From: field of the PR form.
 Your full name in From: and Originator fields of the PR form.
 .It Ev ORGANIZATION
 Name of your organization (if any) to use in the PR form.
-.It Ev BUILDROOT
-Build root directory for 
-.Xr testport 1 .
-Ignored by
-.Nm .
 .It Ev ARCHIVE_DIR
 Directory to archive sent diff and shar files.
 .El
 .Sh FILES
-.Bl -tag -width ".Pa ~/.porttoolsrc" -compact
-.It Pa ~/.porttoolsrc
+.Bl -tag -width ".Pa ~/.porttools" -compact
+.It Pa ~/.porttools
 FreeBSD Port Tools configuration file.
 It is generated automatically if missing.
 .El
