@@ -1,5 +1,15 @@
-18.06.2003 
-- 0.01: first public release
+0.10 (25.06.2003)
+- add configuration file (~/.porttools), generated automatically if it does not exist
+- pr-update, pr-change, pr-new are symlinks to a single script, mode detected based on $0
+- do not use send-pr.template anymore - instead, PR form is generated from by the script
+- cleanup after aborted send-pr(1) - delete generated files and /tmp/pbad.*
+- testport uses configuration file, too
+- testport: BUILDROOT can override where PREFIX is located (default: in /tmp)
+- testport: allow running several testport processes - use PREFIX=${BUILDROOT}/${PKGNAME}
+  (instead of /tmp/${PORTNAME}) and mktemp(1)-ed PKG_DBDIR
+
+0.01 (18.06.2003)
+- first public release
 
 November 2002
 - initial implementation
