@@ -1,6 +1,16 @@
 - add web page
   (added Wed Jun 18 23:24:05 2003, incomplete, priority high)
 
+- Add usage section (in README?) describing CVS usage - many people are afraid of this, I guess
+  (added Fri Aug  1 00:53:10 2003, incomplete, priority medium)
+
+- Split pr-update into 3 separate scripts, one for each operation mode -- there are too many if's and select's in the code
+  now
+  (added Fri Aug  1 00:54:27 2003, incomplete, priority medium)
+
+- Generate man pages (and, possibly, scripts?) from smaller pieces -- this needs some sort of pre-processor
+  (added Fri Aug  1 00:55:26 2003, incomplete, priority medium)
+
 - add zsh completion functions to complete tools' arguments
   (added Wed Jun 18 23:23:43 2003, incomplete, priority low)
 
