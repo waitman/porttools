@@ -1,4 +1,6 @@
+- add Makefile
 - add configuration file 
 - run portlint before pr-{new,update} and testport
+- testport should use getopt(1)
 
 $Id$
