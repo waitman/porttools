@@ -177,7 +177,7 @@ else
 		if [ ${VERSION_CHANGE} -eq 2 ]
 		then
 			OLD_VERSION="`awk '/^-PORTVERSION/ { print $2; }' ${PATCH}`"
-			NEW_VERSION="`awk '/^+PORTVERSION/ { print $2; }' ${PATCH}`"
+			NEW_VERSION="`awk '/^\+PORTVERSION/ { print $2; }' ${PATCH}`"
 			[ "${NEW_VERSION}" != "${OLD_VERSION}" ] && MODE="update"
 		fi
 	fi
@@ -202,7 +202,7 @@ else
 	if [ ${MAINT_CHANGE} -eq 2 ]
 	then
 		OLD_MAINTAINER="`awk '/^-MAINTAINER/ { print $2; }' ${PATCH}`"
-		NEW_MAINTAINER="`awk '/^+MAINTAINER/ { print $2; }' ${PATCH}`"
+		NEW_MAINTAINER="`awk '/^\+MAINTAINER/ { print $2; }' ${PATCH}`"
 		if [ "${NEW_MAINTAINER}" != "${OLD_MAINTAINER}" ]
 		then
 			CC="${OLD_MAINTAINER}"
