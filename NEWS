@@ -5,6 +5,9 @@
 - change: testport was converted to use getopt(1)
 - new: pr-update now accepts command-line arguments using getopt(1):
   -m mode, -s severity, -p priority
+- new: testport now has two new options:
+  -l - stop after running portlint(1)
+  -L - do NOT run portlint(1)
 - new: scripts now contain (and sometime display) the tools version number
 - bugfix: testport: do not check for extra files if $PREFIX does not exist
 
