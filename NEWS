@@ -1,3 +1,10 @@
+0.26, 2003-08-25
+- bugfix: pr-update: prevent warning when ARCHIVE_DIR is unset
+  by proper quoting (thanks, Sergey, Lars and Remi!)
+- bugfix: pr-update: fix a typo: s/ORIG_PORT/ORIG_DIR/ (thanks, Lars!)
+- bugfix: testport: properly handle multiple arguments (thanks, Lars!)
+- change: THANKS: added a new contributor (Remi)
+
 0.25, 2003-08-01
 - new: pr-update and friends now allow non-CVS diff generatin: 
        -d <diffmode> flag (thanks, Jens and Sergey!)
