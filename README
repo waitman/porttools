@@ -34,8 +34,8 @@ custom form which simplified the process a little bit, but still not much.
 
 I also wanted to have consistency in the format of Synopsis and other fields.
 So I came up with these home-grown tools. I use them for several months now
-(approximately since November 2002) and find them quite useful for me.
-Hopefully, they could be useful for somebody else.
+(approximately since November 2002) and find them quite useful 
+(at least, for me).  Hopefully, they could be useful for somebody else.
 
 See list of PRs submitted by me as an example what it looks like:
 http://www.freebsd.org/cgi/query-pr-summary.cgi?originator=kolobov&closedtoo=on
@@ -117,14 +117,13 @@ If you are the port's maintainer, Synopsis is prefixed with
 [MAINTAINER] tag, otherwise - with [PATCH].
 Port maintainer is also automatically CC'ed on your PR.
 
-POST-INSTALLATION
-=================
-Currently, Port Tools do NOT use a configuration file (still in TODO list),
-thus you need to edit all three scripts and adjust e-mail address (and 
-possibly some paths) to your environment. This will be fixed shortly.
+THANKS
+======
+Several people have contributed ideas and/or code to the FreeBSD Port Tools,
+see THANKS file for details.
 
 TODO
 ====
-There are some improvements planned, see TODO file for details
+There are some improvements planned, see TODO file for details.
 
 $Id$
