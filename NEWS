@@ -1,3 +1,9 @@
+0.62, 2004-07-29
+- bugfix: port test: fix logic to generate an unique PREFIX
+- bugfix: port test: DTRT when LOCALBASE == X11BASE
+- change: port test: take additional precautions to prevent deleting
+  PREFIX if PREFIX == LOCALBASE
+
 0.61, 2004-07-29
 - bugfix: port test: fix a typo - unclosed double quote
 - change: LICENSE: update copyright for year 2004
@@ -111,3 +117,5 @@
 
 0.00, 2002-11-??
 - initial implementation
+
+$Id$
