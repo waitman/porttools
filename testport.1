@@ -1,0 +1,155 @@
+.\" Copyright (c) 2003, Sergei Kolobov
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\" $Id$
+.\"
+.Dd July 26, 2003
+.Dt TESTPORT 1
+.Os
+.Sh NAME
+.Nm testport
+.Nd test a new or updated FreeBSD port before submitting a PR
+.Sh SYNOPSIS
+.Nm
+.Op Fl h
+.Op Fl lLbipcC
+.Op Fl - Ar "port knob(s)"
+.Sh DESCRIPTION
+.Nm
+automates the process of testing a new port (or a port update) 
+by going through the steps recommended by the FreeBSD Porter's Handbook:
+.Bl -dash -compact
+.It 
+build 
+.It 
+install
+.It 
+package
+.It 
+deinstall
+.El
+.Pp
+Note: build phase can be run under a regular user account,
+all others require root privileges (
+.Nm
+automatically invokes
+.Em Xr sudo 1 ).
+.Pp
+.Nm
+stops if any errors are encountered during the process.
+.Pp
+To avoid interfering with the ports already installed on the build host, 
+.Ev PREFIX 
+is set so the installation is done to a directory inside
+.Ev BUILDROOT 
+.Pq e.g. Pa /tmp/${PKGNAME} , 
+and 
+.Ev PKG_DBDIR
+points to a temporary package database 
+.Pq e.g. Pa /tmp/pkg_db.xxxxxxx .
+This allows to test an update to a port already
+installed on the build system (same or previous version).
+.Pp
+.Nm
+also detects and lists any files not listed in 
+.Pa pkg-plist 
+during
+.Sq Extra files check
+phase.
+.Pp
+.Nm
+accepts the following command-line options:
+.Bl -tag
+.It Fl h
+Display usage for
+.Nm .
+.It Fl l
+Run
+.Em Xr portlint 1 
+only.
+.It Fl L
+Do not run
+.Em Xr portlint 1 .
+.It Fl b
+Stop after build phase.
+.It Fl i
+Stop after install phase.
+.It Fl p
+Stop after package phase.
+.It Fl c
+Do NOT clean before
+.Nm .
+.It Fl C
+Do NOT clean after
+.Nm .
+.It Fl -
+End of
+.Nm
+options.
+Port knob(s) may follow.
+.El
+.Pp
+.Sh EXAMPLES
+.Bl -tag
+.It Ic "testport -i -C"
+build and install the port, but do not delete the installed files.
+This may be used to manually examine the installed files for correctness.
+.It Ic "testport -- NOPORTDOCS=yes"
+test port without installing documentation 
+(i.e. pass NOPORTDOCS=yes to all make phases).
+Note: you can list as many port knobs/parameters as needed.
+.Sh ENVIRONMENT
+The
+.Nm
+command uses the following environment variables,
+normally sets through the 
+.Pa ~/.porttoolsrc
+configuration file:
+.Bl -tag -width BUILDROOT
+.It Ev BUILDROOT
+Directory where PREFIX and PKG_DBDIR subdirectories will be created.
+Default to
+.Pa /tmp .
+.El
+.Sh FILES
+.Bl -tag -width ".Pa ~/.porttoolsrc" -compact
+.It Pa ~/.porttoolsrc
+FreeBSD Port Tools configuration file.
+It is generated automatically if missing.
+.El
+.Sh SEE ALSO
+.Xr portlint 1 ,
+.Xr pr-change 1 ,
+.Xr pr-new 1 ,
+.Xr pr-update 1 ,
+.Xr sudo 1 .
+.Sh HISTORY
+The
+.Nm
+manual page example first appeared in FreeBSD Port Tools 0.20.
+.Sh AUTHORS
+This manual page was written by
+.An Sergei Kolobov Aq sergei@kolobov.com .
+.Sh BUGS
+Please report any bugs to the author.
