@@ -283,7 +283,7 @@ change|update)
 		# Check to see if the original version of port exist 
 		if [ ! -d ${ORIG_DIR} ]
 		then
-			echo "Original version does not exist at ${ORIG_PORT}"
+			echo "Original version does not exist at ${ORIG_DIR}"
 			rm -rf ${TEMPROOT}
 			exit 1
 		fi
@@ -381,7 +381,7 @@ fi
 
 # Cleanup
 ${MSG} "Saving submitted PR, cleaning up"
-if [ -n ${ARCHIVE_DIR} -a -d ${ARCHIVE_DIR} ]
+if [ -n "${ARCHIVE_DIR}" -a -d ${ARCHIVE_DIR} ]
 then
 	mv ${PATCH} ${ARCHIVE_DIR}
 fi
