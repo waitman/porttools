@@ -62,7 +62,7 @@ else
 			exit 1
 		fi
 
-		DIFF_CMD="cvs diff -u"
+		DIFF_CMD="cvs diff -uN"
 	else 
 		# Non-CVS modes
 		if [ -d ${DIFF_MODE} ]
@@ -70,8 +70,10 @@ else
 			# -d <dir> have been specified
 			# it should be Ports tree location
 			CATEGORY="`make -V CATEGORIES | sed -E 's/^([^ ]+).*$/\1/'`"
+			PKGNAMEPREFIX="`make -V PKGNAMEPREFIX`"
+			PKGNAMESUFFIX="`make -V PKGNAMESUFFIX`"
 			PORTNAME="`make -V PORTNAME`"
-			ORIG_DIR="${DIFF_MODE}/${CATEGORY}/${PORTNAME}"
+			ORIG_DIR="${DIFF_MODE}/${CATEGORY}/${PKGNAMEPREFIX}${PORTNAME}${PKGNAMESUFFIX}"
 		else 
 			# -d <pattern> have been specified
 			# <pattern> is used to determine original port location
