@@ -31,26 +31,22 @@
 
 # Package name and version
 PORTNAME=	porttools
-PORTVERSION=	0.01
+PORTVERSION=	0.10
 DISTNAME=	${PORTNAME}-${PORTVERSION}
 
 # Installation prefix (defaults to /usr/local)
 PREFIX?=	/usr/local
 BINDIR?=	${PREFIX}/bin
-DATADIR?=	${PREFIX}/share/${PORTNAME}
 DOCSDIR?=	${PREFIX}/share/doc/${PORTNAME}
 
 # Scripts to install
 SCRIPTS=	pr-new pr-update testport
 
-# send-pr(1) form template
-TEMPLATE=	send-pr.template
-
 # Documentation files
 DOCS=		LICENSE README TODO 
 
 # All distribution files
-DIST=		Makefile ${SCRIPTS} ${TEMPLATE} ${DOCS}
+DIST=		Makefile ${SCRIPTS} ${DOCS}
 
 # No build required
 build:
@@ -60,8 +56,6 @@ build:
 install:
 	test -d ${BINDIR} || mkdir -p ${BINDIR}
 	${INSTALL_SCRIPT} ${SCRIPTS} ${BINDIR}
-	test -d ${DATADIR} || mkdir -p ${DATADIR}
-	${INSTALL_DATA} ${TEMPLATE} ${DATADIR}
 .if !defined(NOPORTDOCS)
 	test -d ${DOCSDIR} || mkdir -p ${DOCSDIR}
 	${INSTALL_DATA} ${DOCS} ${DOCSDIR}
