@@ -1,3 +1,13 @@
+0.20 (27.07.2003)
+- change: the only supported method of installation is through devel/porttools
+  port from now on; Makefile is no longer included with the distribution
+- new: added manpages
+- change: testport was converted to use getopt(1)
+- new: pr-update now accepts command-line arguments using getopt(1):
+  -m mode, -s severity, -p priority
+- new: scripts now contain (and sometime display) the tools version number
+- bugfix: testport: do not check for extra files if $PREFIX does not exist
+
 0.16 (21.07.2003)
 - bugfix: do not remove PKG_DBDIR in "clean before build phase:
           it cause failure when in install phase with new code
