@@ -39,7 +39,27 @@ CONFIG="${HOME}/.porttools"
 # Commands to output a message with standard prefix
 MSG='echo ===> '
 ERROR='echo Error '
-USAGE="Usage: $0 [-h] [-m new|change|update] [-s severity] [-p priority]"
+
+# Usage
+usage ()
+{
+cat << EOF
+FreeBSD Port Tools __VERSION__
+Usage: $0 [-h] [-m <mode>] [-d <diff mode>] [-s <severity>] [-p <priority>]
+	-h	- Display this usage
+	-m <mode> - Select mode of operation:
+		new - submitting new port
+		change - changing a port 
+		update - updating a port to newer version
+	-d <diff mode> - Select diff generation mode:
+		CVS - against CVS
+		<dir> - against Ports tree in <dir>
+		<pattern> - against original port in <pwd><pattern>
+	-s <severity> - Set PR's severity to <severity>
+	-p <priority> - Set PR's priority to <priority>
+EOF
+}
+
 
 # Initialize arguments to the default values
 MODE="`basename $0 | sed 's/pr-//'`"
@@ -47,11 +67,11 @@ SEVERITY="non-critical"
 PRIORITY="low"
 
 # Parse command line arguments
-ARGS=`/usr/bin/getopt hm:s:p: $*`
+ARGS=`/usr/bin/getopt hm:d:s:p: $*`
 if [ $? != 0 ]
 then
 	echo "Error: invalid arguments"
-	echo ${USAGE}
+	usage
 	exit 2
 fi
 
@@ -60,7 +80,7 @@ for i
 do
 	case "$i" in
 	-h)	# help
-		echo ${USAGE}
+		usage
 		exit 0
 		;;
 	-m)	# mode
@@ -77,6 +97,11 @@ do
 			;;
 		esac
 		;;
+	-d)	# diff mode
+		DIFF_MODE=$2
+		shift
+		shift
+		;;
 	-s)	# severity
 		SEVERITY=$2
 		case "${SEVERITY}" in
@@ -92,8 +117,8 @@ do
 		esac
 		;;
 	-p)	# prority
-		PRORITY=$2
-		case "${PRORITY}" in
+		PRIORITY=$2
+		case "${PRIORITY}" in
 		low|medium|high)
 			shift
 			shift
@@ -135,6 +160,7 @@ then
 	ORGANIZATION=""
 	BUILDROOT="/tmp"
 	ARCHIVE_DIR=""
+	DIFF_MODE="CVS"
 	EOF
 fi
 
@@ -215,44 +241,74 @@ new)
 	cd ${SAVE_CWD}
 	;;
 change|update)
-	# Require a working copy of the port checked out of CVS
-	if [ ! -d CVS ]
+	# Default to CVS diff mode
+	[ "${DIFF_MODE}" = "" ] && DIFF_MODE="CVS"
+
+	# If there is no CVS subdirectory then
+	# fallback to diffing against /usr/ports tree 
+	if [ "${DIFF_MODE}" = "CVS" -a ! -d CVS ]
 	then
-		echo "Error: no CVS subdir found"
-		rm -rf ${TEMPROOT}
-		exit 1
+		DIFF_MODE="/usr/ports"
 	fi
 
-	# Test for ~/.cvspass and create if necessary
-	test -f ${HOME}/.cvspass || touch ${HOME}/.cvspass
-
-	# Run 'cvs update' first
-	${MSG} "Updating from CVS"
-	cvs update -Pd
-	if [ $? -ne 0 ]
+	if [ "${DIFF_MODE}" = "CVS" ]
 	then
-		${ERROR} "updating CVS"
-		rm -rf ${TEMPROOT}
-		exit 1
+		# Test for ~/.cvspass and create if necessary
+		test -f ${HOME}/.cvspass || touch ${HOME}/.cvspass
+
+		# Run 'cvs update' first
+		${MSG} "Updating from CVS"
+		cvs update -Pd
+		if [ $? -ne 0 ]
+		then
+			${ERROR} "updating CVS"
+			rm -rf ${TEMPROOT}
+			exit 1
+		fi
+
+		DIFF_CMD="cvs diff -u"
+	else 
+		# Non-CVS modes
+		if [ -d ${DIFF_MODE} ]
+		then
+			# -d <dir> must have been specified
+			# it should be Ports tree location
+			ORIG_DIR="${DIFF_MODE}/${CATEGORY}/${PORTNAME}"
+		else 
+			# -d <pattern> must have been specified
+			# <pattern> is used to determine original port location
+			ORIG_DIR="`pwd`${DIFF_MODE}"
+		fi
+
+		# Check to see if the original version of port exist 
+		if [ ! -d ${ORIG_DIR} ]
+		then
+			echo "Original version does not exist at ${ORIG_PORT}"
+			rm -rf ${TEMPROOT}
+			exit 1
+		fi
+		
+		DIFF_CMD="diff -ruN --exclude=CVS ${ORIG_DIR} `pwd`"
 	fi
 
 	# Generate patch
-	${MSG} "Generating patch against CVS"
+	${MSG} "Generating patch"
 	PATCH="${TEMPROOT}/${PKGNAME}.patch"
-	cvs diff -u > ${PATCH}
+	${DIFF_CMD} > ${PATCH}
 	#if [ $? -ne 0 ]
 	#then
 	#	${ERROR} "generating patch"
 	#	exit 1
 	#fi
 
+	# Check to see if maintainership was requested
 	MAINT_CHANGE="`grep '^[+-]MAINTAINER=' ${PATCH} | wc -l`"
 	if [ ${MAINT_CHANGE} -eq 2 ]
 	then
 		CLASS="update"
 		PREFIX="PATCH"
 		SUFFIX="${SUFFIX}, take maintainership"
-		DESCRIPTION="$DESCRIPTION}\n- Take maintainership"
+		DESCRIPTION="${DESCRIPTION}, take maintainership"
 	fi
 	;;
 esac
