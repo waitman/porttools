@@ -43,7 +43,7 @@ DOCSDIR?=	${PREFIX}/share/doc/${PORTNAME}
 SCRIPTS=	pr-new pr-update testport
 
 # Documentation files
-DOCS=		LICENSE README TODO 
+DOCS=		LICENSE NEWS README TODO 
 
 # All distribution files
 DIST=		Makefile ${SCRIPTS} ${DOCS}
