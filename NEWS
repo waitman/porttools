@@ -1,3 +1,9 @@
+0.16 (21.07.2003)
+- bugfix: do not remove PKG_DBDIR in "clean before build phase:
+          it cause failure when in install phase with new code
+	  in bsd.port.mk
+- cosmetique: change prefix in testport's output
+
 0.15 (14.07.2003)
 - respect PKGNAMEPREFIX and PKGNAMESUFFIX in pr-* scripts (thanks, Tim!)
 - minor fixes/cleanups

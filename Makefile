@@ -31,7 +31,7 @@
 
 # Package name and version
 PORTNAME=	porttools
-PORTVERSION=	0.15
+PORTVERSION=	0.16
 DISTNAME=	${PORTNAME}-${PORTVERSION}
 
 # Installation prefix (defaults to /usr/local)
