@@ -30,6 +30,7 @@ Usage:	port submit [-h] [-m <mode>] [-d <diff mode>]
 		<pattern> - against original port in <pwd><pattern>
 	-s <severity> - Set PR's severity to <severity>
 	-p <priority> - Set PR's priority to <priority>
+	-c	- committer mode: more portlint(1) checks
 	-L	- Skip running portlint(1)
 EOF
 }
@@ -38,10 +39,11 @@ EOF
 # Initialize arguments to the default values
 SEVERITY="non-critical"
 PRIORITY="low"
+COMMITTER="no"
 RUN_PORTLINT="yes"
 
 # Parse command line arguments
-ARGS=`/usr/bin/getopt hm:d:s:p:L $*`
+ARGS=`/usr/bin/getopt hm:d:s:p:cL $*`
 if [ $? != 0 ]
 then
 	echo "Error: invalid arguments"
@@ -64,7 +66,6 @@ do
 		case "${MODE}" in
 		new|change|update)
 			shift
-			shift
 			;;
 		*)
 			echo "Error: invalid mode: ${MODE}"
@@ -77,14 +78,12 @@ do
 	-d)
 		DIFF_MODE=$2
 		shift
-		shift
 		;;
 	# PR severity
 	-s)
 		SEVERITY=$2
 		case "${SEVERITY}" in
 		non-critical|serious|critical)
-			shift
 			shift
 			;;
 		*)
@@ -100,7 +99,6 @@ do
 		case "${PRIORITY}" in
 		low|medium|high)
 			shift
-			shift
 			;;
 		*)
 			echo "Error: invalid priority: ${PRIORITY}"
@@ -109,11 +107,16 @@ do
 			;;
 		esac
 		;;
+	# committer mode
+	-c)
+		COMMITTER="yes"
+		;;
 	# don't run portlint(1)
 	-L)
-		RUN_PORTLINT=no
+		RUN_PORTLINT="no"
 		;;
 	esac
+	shift
 done
 
 # Determine if this is a new port
@@ -126,8 +129,9 @@ fi
 if [ "${RUN_PORTLINT}" = "yes" ]
 then
 	echo "===> Validating port with portlint"
-	FLAGS="-${PORTLINT_FLAGS:-abct}"
-	[ "${MODE}" = "new" ] && FLAGS="-N ${FLAGS}"
+	FLAGS="-${PORTLINT_FLAGS:-abt}"
+	[ "${COMMITTER}" = "yes" ] && FLAGS="${FLAGS} -c"
+	[ "${MODE}" = "new" ] && FLAGS="${FLAGS} -N"
 	portlint ${FLAGS}
 	if [ $? -ne 0 ]
 	then
