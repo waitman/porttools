@@ -1,3 +1,8 @@
+0.12 (14.07.2003)
+- respect PKGNAMEPREFIX and PKGNAMESUFFIX in pr-* scripts (thanks, Tim!)
+- minor fixes/cleanups
+- added THANKS file to list contributors
+
 0.11 (08.07.2003)
 - detect situations where maintainership change is requested, adjust
   PR form respectively
