@@ -45,6 +45,9 @@
 - testport: use $TMPDIR instead of hardwiring /tmp (or perhaps make it a variable in config file
   (added Fri Jun 20 15:23:37 2003, completed on Wed Jun 25 02:18:26 2003, priority medium)
 
+- detect maintainer change requst - remove [MAINTAINER] and maintainer-update
+  (added Mon Jun 23 01:37:29 2003, completed on Tue Jul  8 16:31:58 2003, priority medium)
+
 - cleanup if send-pr is aborted (TEMPROOT, /tmp/pbad*)
   (added Mon Jun 23 02:24:25 2003, completed on Wed Jun 25 01:26:45 2003, priority medium)
 
@@ -59,9 +62,6 @@
 
 - add manpages
   (added Wed Jun 18 23:23:53 2003, incomplete, priority medium)
-
-- detect maintainer change requst - remove [MAINTAINER] and maintainer-update
-  (added Mon Jun 23 01:37:29 2003, incomplete, priority medium)
 
 - add zsh completion functions to complete tools' arguments
   (added Wed Jun 18 23:23:43 2003, incomplete, priority low)
