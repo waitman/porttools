@@ -31,7 +31,7 @@
 
 # Package name and version
 PORTNAME=	porttools
-PORTVERSION=	0.11
+PORTVERSION=	0.12
 DISTNAME=	${PORTNAME}-${PORTVERSION}
 
 # Installation prefix (defaults to /usr/local)
@@ -43,7 +43,7 @@ DOCSDIR?=	${PREFIX}/share/doc/${PORTNAME}
 SCRIPTS=	pr-change pr-new pr-update testport
 
 # Documentation files
-DOCS=		LICENSE NEWS README TODO 
+DOCS=		LICENSE NEWS README THANKS TODO 
 
 # All distribution files
 DIST=		Makefile ${SCRIPTS} ${DOCS}
