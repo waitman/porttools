@@ -1,6 +1,26 @@
 - add Makefile
-- add configuration file 
+- add configuration file (~/.porttoolsrc, /bin/sh syntax)
 - run portlint before pr-{new,update} and testport
 - testport should use getopt(1)
+- introduce pr-change - submit a change-request for port, without updating it
+- make all pr-* tools symlinks (hardlinks) to each other, action chosen based on $0
+- pr-* tools should use getopt(1) :
+   -s <severity>
+   -p <priority>
+- add zsh completion functions to complete tools' arguments
+- add manpages
+- add web page
+- testport should use mktemp(1) for /tmp/${PORTNAME} and /tmp/pkg_db 
+- generalize send-pr.template
+- use EMAIL and FULLNAME in send-pr.template
+- create 2 versions of the template:
+  - full, with all original comments
+  - condensed (edited by me)
+  install in ${EXAMPLESDIR} by default
+- tools should create any missing files automatically:
+  - ~/.cvspass -> create empty
+  - ~/.send-pr.template -> copy full version from ${EXAMPLESDIR}
+  - ~/.porttoolsrc -> create automatically (mainly for EMAIL and FULLNAME)
+
 
 $Id$
