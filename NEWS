@@ -1,4 +1,4 @@
-0.12 (14.07.2003)
+0.15 (14.07.2003)
 - respect PKGNAMEPREFIX and PKGNAMESUFFIX in pr-* scripts (thanks, Tim!)
 - minor fixes/cleanups
 - added THANKS file to list contributors
