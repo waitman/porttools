@@ -39,7 +39,23 @@ CONFIG="${HOME}/.porttools"
 # Commands to output a message with standard prefix
 MSG='echo ===> testport: '
 ERROR='echo testport: Error '
-USAGE="Usage: testport [-h ] [-lLbipdcC]"
+
+# Usage
+usage ()
+{
+cat << EOF
+FreeBSD Port Tools __VERSION__
+Usage: testport [-h ] [-lLbipdcC] [-- <port knobs>]
+	-h	Display this usage synopsis
+	-l	Run portlint(1) only
+	-L	Do NOT run portlint(1)
+	-b	Stop after 'make build' phase
+	-i	Stop after 'make install' phase
+	-p	Stop after 'make package' phase
+	-c	Do NOT clean before
+	-C	Do NOT clean after
+EOF
+}
 
 # Defaults
 RUN_PORTLINT="yes"
@@ -47,11 +63,11 @@ CLEAN_BEFORE="yes"
 CLEAN_AFTER="yes"
 
 # Parse command line arguments
-ARGS=`/usr/bin/getopt hbipdBIPDcClL $*`
+ARGS=`/usr/bin/getopt hlLbipcC $*`
 if [ $? != 0 ]
 then
 	echo "Error: invalid arguments"
-	echo ${USAGE}
+	usage
 	exit 2
 fi
 
@@ -60,7 +76,7 @@ for i
 do
 	case "$i" in
 	-h)	# help
-		echo ${USAGE}
+		usage
 		exit 0
 		;;
 	-l)	# run portlint(1) only
@@ -77,9 +93,6 @@ do
 		;;
 	-p) 	# stop after package phase
 		STOP="package"
-		;;
-	-d)	# stop after deinstall phase
-		STOP="deinstall"
 		;;
 	-c)	# Do NOT clean before 
 		CLEAN_BEFORE="no"
@@ -121,6 +134,7 @@ then
 	ORGANIZATION=""
 	BUILDROOT="/tmp"
 	ARCHIVE_DIR=""
+	DIFF_MODE="CVS"
 	EOF
 fi
 
