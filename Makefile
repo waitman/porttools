@@ -7,7 +7,7 @@
 
 # Package name and version
 PORTNAME=	porttools
-PORTVERSION=	0.25
+PORTVERSION=	0.26
 DISTNAME=	${PORTNAME}-${PORTVERSION}
 
 SCRIPTS=	pr-update testport
