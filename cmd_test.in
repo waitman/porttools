@@ -17,7 +17,7 @@ usage ()
 {
 cat << EOF
 FreeBSD Port Tools __VERSION__
-Usage: testport [-h ] [-lLbipdcC] [-- <port knobs>]
+Usage: port test [-h ] [-lLbipdcC] [-- <port knobs>]
 	-h	Display this usage summary
 	-l	Run portlint(1) only
 	-L	Do NOT run portlint(1)
@@ -33,6 +33,7 @@ EOF
 RUN_PORTLINT="yes"
 CLEAN_BEFORE="yes"
 CLEAN_AFTER="yes"
+CLEAN_PREFIX="yes"
 
 # Parse command line arguments
 ARGS=`/usr/bin/getopt hlLbipcC $*`
@@ -84,7 +85,7 @@ done
 if [ "${RUN_PORTLINT}" = "yes" ]
 then
 	echo "===> Validating port with portlint"
-	PORTLINT_FLAGS="-abct"
+	PORTLINT_FLAGS="-abt"
 	portlint ${PORTLINT_FLAGS}
 	if [ $? -ne 0 ]
 	then
@@ -98,10 +99,25 @@ fi
 
 # Collect information about the port
 PKGNAME="`make -V PKGNAME`"
-PREFIX="${BUILDROOT:-/tmp}/${PKGNAME}"
+PKGPLIST="`make -V PKGPLIST`"
 
 # Create a temporary dir for temporary package database
 PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
+
+# Do not attempt to clean up in PREFIX if installing into 
+# either LOCALBASE or X11BASE
+LOCALBASE="`make -V LOCALBASE`"
+X11BASE="`make -V X11BASE`"
+PREFIX="`make -V PREFIX`"
+if [ "${PREFIX}" = "${LOCALBASE}" -o "${PREFIX}" = "${X11BASE} ]
+then
+	CLEAN_PREFIX="no"
+else
+	# Some ports fail to build if PREFIX contains commas 
+	# (mostly due to constructs like "sed -e 's,foo,bar')
+	# or plus signs - remove those characters from generated PREFIX
+	PREFIX="${BUILDROOT:-/tmp}/`echo ${PKGNAME} | tr -d ',+'`"
+fi
 
 # Display FLAGS
 PORT_FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
@@ -110,9 +126,9 @@ echo "===> flags: ${PORT_FLAGS}"
 # Start with a clean workspace
 if [ "${CLEAN_BEFORE}" = "yes" ]
 then
-	echo "===> Cleaning workspace before testport"
+	echo "===> Cleaning workspace before port test"
 	make clean
-	sudo rm -rf ${PREFIX}
+	[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
 fi
 
 # Go through the build phases
@@ -121,11 +137,35 @@ do
 	SUDO="sudo"
 	[ "${PHASE}" = "build" ] && SUDO=""
 
+	if [ "${PHASE}" = "deinstall" ]
+	then
+		# Before deinstalling, check pkg_info output
+		echo "===> Checking pkg_info"
+		PKG_DBDIR=${PKG_DBDIR} pkg_info | grep ${PKGNAME}
+
+		# XXX Dirty hack to avoid checking the whole
+		# LOCALBASE or X11BASE trees
+		if [ "${CLEAN_PREFIX}" = "yes" ]
+		then
+			# Also check ldd(1) output on binaries
+			echo "===> Checking shared library dependencies"
+	#		grep -E "(bin|exec)/" ${PKGPLIST} | \
+	#			sed -e "s,^,${PREFIX}/," | \
+	#			xargs ldd | grep '=>' | \
+	#			awk '{print $3;}' | sort -u
+			ldd ${PREFIX}/bin/* ${PREFIX}/sbin/* \
+				${PREFIX}/libexec/* /dev/null \
+				| grep '=>' | awk '{print $3;}'\
+				| sort | uniq -c
+		fi
+	fi
+
 	${SUDO} make ${PORT_FLAGS} ${PHASE}
 	if [ $? -gt 0 ]; then
 		echo "Error running make ${PHASE}"
 		echo "===> Cleaning up"
-		sudo rm -rf ${PREFIX} ${PKG_DBDIR}
+		[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
+		sudo rm -rf ${PKG_DBDIR}
 		exit 1
 	fi
 
@@ -134,17 +174,22 @@ done
 
 # Check for extra files left
 echo "===> Extra files check"
-if [ -d ${PREFIX} ]
+if [ -d ${PREFIX} -a "${CLEAN_PREFIX}" = "yes" ]
 then
-	find ${PREFIX} ! -type d | egrep -v "${PREFIX}/share/nls/(POSIX|en_US.US-ASCII)"
+	# Remove PREFIX from the extra files list
+	# XXX Dirty hack to hide these 2 files that always show up
+	find ${PREFIX} ! -type d | \
+		egrep -v "${PREFIX}/share/nls/(POSIX|en_US.US-ASCII)"  | \
+		sed -e "s,^${PREFIX}/,,"
 fi
 
 # Finish with a clean workspace
 if [ "${CLEAN_AFTER}" = "yes" ]
 then
-	echo "===> Cleaning up after testport"
+	echo "===> Cleaning up after port test"
 	make clean
-	sudo rm -rf ${PREFIX} ${PKG_DBDIR}
+	[ "${CLEAN_PREFIX}" = "yes" ] && sudo rm -rf ${PREFIX}
+	sudo rm -rf ${PKG_DBDIR}
 fi
 
 echo "===> Done."
