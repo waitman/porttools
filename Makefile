@@ -49,6 +49,9 @@ install-docs:
 	mkdir -p ${DOCSDIR}
 	${BSD_INSTALL_DATA} ${DOCS} ${DOCSDIR}
 
+clean:
+	rm -rf ${PROGRAMS} ${SCRIPTS} ${DISTNAME}*
+
 ##
 ## Maintainer section
 ##
