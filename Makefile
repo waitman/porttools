@@ -40,7 +40,7 @@ BINDIR?=	${PREFIX}/bin
 DOCSDIR?=	${PREFIX}/share/doc/${PORTNAME}
 
 # Scripts to install
-SCRIPTS=	pr-new pr-update testport
+SCRIPTS=	pr-change pr-new pr-update testport
 
 # Documentation files
 DOCS=		LICENSE NEWS README TODO 
