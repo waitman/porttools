@@ -34,7 +34,7 @@
 .Nm
 .Op Fl h
 .Op Fl lLbipcC
-.Op Fl - Ar "port knob(s)"
+.Op Fl - Ar "port knobs"
 .Sh DESCRIPTION
 .Nm
 automates the process of testing a new port (or a port update) 
@@ -51,10 +51,10 @@ deinstall
 .El
 .Pp
 Note: build phase can be run under a regular user account,
-all others require root privileges (
+all others require root privileges, so 
 .Nm
 automatically invokes
-.Em Xr sudo 1 ).
+.Em Xr sudo 1 .
 .Pp
 .Nm
 stops if any errors are encountered during the process.
@@ -107,7 +107,7 @@ Do NOT clean after
 End of
 .Nm
 options.
-Port knob(s) may follow.
+Port knobs may follow.
 .El
 .Pp
 .Sh EXAMPLES
@@ -124,7 +124,7 @@ The
 .Nm
 command uses the following environment variables,
 normally sets through the 
-.Pa ~/.porttoolsrc
+.Pa ~/.porttools
 configuration file:
 .Bl -tag -width BUILDROOT
 .It Ev BUILDROOT
@@ -133,8 +133,8 @@ Default to
 .Pa /tmp .
 .El
 .Sh FILES
-.Bl -tag -width ".Pa ~/.porttoolsrc" -compact
-.It Pa ~/.porttoolsrc
+.Bl -tag -width ".Pa ~/.porttools" -compact
+.It Pa ~/.porttools
 FreeBSD Port Tools configuration file.
 It is generated automatically if missing.
 .El
