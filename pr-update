@@ -85,7 +85,7 @@ ${MSG} "Reading configuration from ${CONFIG}"
 . ${CONFIG}
 
 # Collect information about the port
-PORTNAME="`make -V PORTNAME`"
+PORTNAME="`make -V PKGNAMEPREFIX``make -V PORTNAME``make -V PKGNAMESUFFIX`"
 PORTVERSION="`make -V PORTVERSION`"
 PKGNAME="`make -V PKGNAME`"
 CATEGORY="`make -V CATEGORIES | sed -E 's/^([^ ]+).*$/\1/'`"
@@ -143,21 +143,25 @@ TEMPROOT="`mktemp -d -t ${MODE}`" || exit 1
 case ${MODE} in
 pr-new)
 	${MSG} "Creating shar file"
-	PATCH="${TEMPROOT}/${PORTNAME}.shar"
+	PATCH="${TEMPROOT}/${PKGNAME}.shar"
+	SAVE_CWD="`pwd`"
+	DIR="`basename ${SAVE_CWD}`"
 	cd ..
-	shar `find ${PORTNAME}` > ${PATCH}
+	shar `find ${DIR}` > ${PATCH}
 	if [ $? -ne 0 ]
 	then
 		${ERROR} "generating patch"
+		rm -rf ${TEMPROOT}
 		exit 1
 	fi
-	cd ${PORTNAME}
+	cd ${SAVE_CWD}
 	;;
 pr-change|pr-update)
 	# Require a working copy of the port checked out of CVS
 	if [ ! -d CVS ]
 	then
 		${ERROR} "- No CVS subdir found, exiting"
+		rm -rf ${TEMPROOT}
 		exit 1
 	fi
 
@@ -170,6 +174,7 @@ pr-change|pr-update)
 	if [ $? -ne 0 ]
 	then
 		${ERROR} "updating CVS"
+		rm -rf ${TEMPROOT}
 		exit 1
 	fi
 
@@ -197,16 +202,9 @@ esac
 # Generate Synopsis line
 SYNOPSIS="[${PREFIX}] ${CATEGORY}/${PORTNAME}: ${SUFFIX}"
 
-${MSG} "Creating temporary file for PR"
-TMPFILE="${TEMPROOT}/PR"
-if [ $? -ne 0 ]
-then
-	${ERROR} "generating temporary file name"
-	exit 1
-fi
-
 ${MSG} "Generating PR form"
-cat > ${TMPFILE} << EOF
+PR_FORM="${TEMPROOT}/PR"
+cat > ${PR_FORM} << EOF
 SEND-PR: -*- send-pr -*-
 SEND-PR: Generated with FreeBSD Port Tools
 To: FreeBSD-gnats-submit@freebsd.org
@@ -240,25 +238,25 @@ EOF
 
 case ${MODE} in
 pr-new)
-	cat pkg-descr >> ${TMPFILE}
+	cat pkg-descr >> ${PR_FORM}
 	;;
 *)
-	echo ${DESCRIPTION} >> ${TMPFILE}
+	echo ${DESCRIPTION} >> ${PR_FORM}
 	if [ "${CC}" != "" ]
 	then
-		echo >> ${TMPFILE}
-		echo "Port maintainer (${MAINTAINER}) is cc'd." >> ${TMPFILE}
+		echo >> ${PR_FORM}
+		echo "Port maintainer (${MAINTAINER}) is cc'd." >> ${PR_FORM}
 	fi
 esac
 
-cat >> ${TMPFILE} << EOF
+cat >> ${PR_FORM} << EOF
 >How-To-Repeat:
 >Fix:
 EOF
 
 # Invoke send-pr(1)
 ${MSG} "Invoking send-pr to submit a PR"
-PR_FORM="${TMPFILE}" send-pr -a ${PATCH}
+PR_FORM="${PR_FORM}" send-pr -a "${PATCH}"
 if [ $? -ne 0 ]
 then
 	${ERROR} "submitting PR"
