@@ -58,9 +58,12 @@ build:
 
 # Installation
 install:
+	test -d ${BINDIR} || mkdir -p ${BINDIR}
 	${INSTALL_SCRIPT} ${SCRIPTS} ${BINDIR}
+	test -d ${DATADIR} || mkdir -p ${DATADIR}
 	${INSTALL_DATA} ${TEMPLATE} ${DATADIR}
 .if !defined(NOPORTDOCS)
+	test -d ${DOCSDIR} || mkdir -p ${DOCSDIR}
 	${INSTALL_DATA} ${DOCS} ${DOCSDIR}
 .endif
 
