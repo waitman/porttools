@@ -1,3 +1,5 @@
+FreeBSD Port Tools
+
 Copyright (c) 2003 Sergei Kolobov. All rights reserved.
 
 This program is free software; you can redistribute it and/or 
@@ -8,5 +10,113 @@ This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the BSD
 License for more details.
+
+SUMMARY:
+========
+
+FreeBSD Port Tools consist of the following small scripts:
+- testport: a script to automate testing a new port or a port update
+- pr-new: a script to simplify submitting a Problem Report (PR) for a new port
+- pr-update: a script to simplify submitting a PR with a port update
+
+BACKGROUND:
+===========
+
+I have submitted quite a few ports PR myself, and soon got tired of editing
+the default send-pr form to fill in the fields. So I first created my own
+custom form which simplified the process a little bit, but still not much.
+
+I also wanted to have consistency in the format of Synopsis and other fields.
+So I came up with these home-grown tools. I use them for several months now
+(approximately since November 2002) and find them quite useful for me.
+Hopefully, they could be useful for somebody else.
+
+DESCRIPTION:
+============
+
+A short description of each script is below.
+
+<I am planning to add more documentation, including a manpage for each script>
+
+testport
+========
+testport automates the process of testing a new port (or a port update) 
+by going through the steps recommended in the Porter's Handbook:
+- build 
+- install
+- package
+- deinstall
+
+testport stops if any errors are encountered during the process.
+
+To avoid messing up the build system, installation is done to a directory 
+inside /tmp (/tmp/${PORTNAME}), and temporary package database (/tmp/pkg_db)
+is used for the same purpose. This allows to test an update to a port already
+installed on the build system (same or previous version).
+
+testport also detects any files not listed in pkg-plist during 
+"Extra files check" phase.
+
+testport accepts the following command-line options:
+
+testport [-bipcC] [--] [<knob(s)>]
+
+-b	stop after Build phase
+-i	stop after Install phase
+-p	stop after Package phase
+
+-c	do NOT run 'make clean' before the process (default to run 'make clean')
+-C	do NOT run 'make clean' after the process (default to run 'make clean')
+
+--	indicates the end of options (port's compile-time knobs follow).
+
+Examples:
+
+testport -i -C
+	build and install the port, but do not delete the installed files
+	(I use to manually examine the installed files for correctness).
+
+testport -- NOPORTDOCS=yes
+	pass NOPORTDOCS=yes to all make phases
+	(Note: you can list as many parameters as needed)
+
+pr-new
+======
+pr-new simplifies submitting a PR with a new port.
+It automatically fills in some fields in the send-pr form,
+generates a shar file containing the port and names it properly,
+runs send-pr to actually submit PR and then saves that shar file
+for archiving purposes.
+
+Run pr-new from inside the port's directory.
+
+Fields automatically filled-in by pr-new:
+- Synopsis: [PATCH] <category>/<portname>: <port's COMMENT>
+- Severity: non-critical
+- Priority: low
+- Category: ports
+- Class: change-request
+- Release: <`uname -srp`>
+- System: <shortened output from uname -a>
+
+pr-update
+=========
+Similar to pr-new, but used for submitting port updates.
+Run from a checked-out CVS working copy of the port.
+In addition to filling out send-pr form, it automatically
+run "cvs update" first and then generates a diff against CVS.
+If you are the port's maintainer, Synopsis is prefixed with
+[MAINTAINER] tag, otherwise - with [PATCH].
+Port maintainer is also automatically CC'ed on your PR.
+
+POST-INSTALLATION
+=================
+Currently, Port Tools do NOT use a configuration file (still in TODO list),
+thus you need to edit all three scripts and adjust e-mail address (and 
+possibly some paths) to your environment. This will be fixed shortly.
+
+TODO
+====
+There are some improvements planned, see TODO file for details
 
 $Id$
