@@ -1,3 +1,8 @@
+0.11 (08.07.2003)
+- detect situations where maintainership change is requested, adjust
+  PR form respectively
+- fix bug which prevented submitted patch to be saved in ${ARCHIVE_DIR}
+
 0.10 (25.06.2003)
 - add configuration file (~/.porttools), generated automatically if it does not exist
 - pr-update, pr-change, pr-new are symlinks to a single script, mode detected based on $0
