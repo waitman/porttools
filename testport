@@ -105,6 +105,7 @@ do
 		break;
 		;;
 	esac
+	shift
 done
 
 # Run portlint(1) to validate port's sanity
