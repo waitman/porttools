@@ -1,3 +1,31 @@
+0.60, 2004-07-29
+- add: port submit: new option: -c (committer check): adds "-c" to portlint(1)
+  flags when checking the port for sanity before submitting 
+  (previously "-c" was always added - could cause problems with recent
+  portlint versions)
+- change: port test: change portlint(1) flags from "-abct" to "-abt"
+- change: port test: avoid using commas and plus signs when generating PREFIX
+  (some ports breaks with such PREFIX)
+- change: port test: avoid deleting PREFIX before and after port test
+  if installing into LOCALBASE or X11BASE (ouch!)
+- add: port test: before deinstall, use pkg_info(1) to output line
+  with PKGNAME and COMMENT to check against provided in Makefile
+  (mostly for COMMENT truncation cases)
+  NOTE: this should really be checked by portlint(1)
+- add: port test: before deinstall, run ldd(1) on each installed binary
+  to depend any hidden (or improper) shared library dependencies
+- change: port test: remove PREFIX from the list of extra files
+  (for easier copy-and-pasting into pkg-plist)
+- bugfix: util_diff: use PKGNAMEPREFIX and PKGNAMESUFFIX to determine the
+  original port dir if diff'ing in non-CVS mode (reported by many)
+- change: util_diff: add "-N" to "cvs diff" options to include newly created
+  files in the diff (suggested by Tim Bishop - thanks!)
+- change: port submit: extend functionality of added/deleted files
+  detection to work in non-CVS mode, too - patch provided by Sergey
+  Matveychuk (thanks!); closes #995048
+- bugfix: port submit: fix update and change maintainer detection 
+  by properly escape awk regexp (thanks, Sergey!)
+
 0.50, 2003-10-20
 - new: change command-line interface: now all scripts are run via 
   port(1) front-end
