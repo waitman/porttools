@@ -11,6 +11,9 @@
 - Generate man pages (and, possibly, scripts?) from smaller pieces -- this needs some sort of pre-processor
   (added Fri Aug  1 00:55:26 2003, incomplete, priority medium)
 
+- Add man page for ~/.porttools config file format
+  (added Fri Aug  1 01:01:21 2003, incomplete, priority medium)
+
 - add zsh completion functions to complete tools' arguments
   (added Wed Jun 18 23:23:43 2003, incomplete, priority low)
 
