@@ -2,28 +2,20 @@ FreeBSD Port Tools
 
 Copyright (c) 2003 Sergei Kolobov. All rights reserved.
 
-This program is free software; you can redistribute it and/or 
-modify it under the terms of the "BSD License" which is 
-distributed with the software in the file LICENSE.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the BSD
-License for more details.
-
 INTRODUCTION
 ============
 
 FreeBSD Port Tools consist of the following small scripts:
-- testport: a script to automate testing a new port or a port update
-- pr-new: a script to simplify submitting a Problem Report (PR) for a new port
-- pr-update: a script to simplify submitting a PR with a port update
-
-NOTE: the Port Tools are currently in pre-alpha state. I would appreciate 
-any feedback, comments or suggestions for improvement. Patches are welcome.
-Contact me at <sergei@kolobov.com>.
+- testport: automate testing a new port or a port update
+- pr-new: submit a PR for a new port
+- pr-update: submit a PR with a port update to a newer version
+- pr-change: submit a PR with a port change (but not update)
 
 FreeBSD Port Tools are available at http://sourceforge.net/projects/porttools/.
+
+NOTE: the Port Tools are currently in alpha state. 
+I would appreciate any feedback, comments or suggestions for improvement. 
+Patches are welcome.  Contact me at <sergei@kolobov.com>.
 
 BACKGROUND
 ==========
@@ -42,80 +34,8 @@ http://www.freebsd.org/cgi/query-pr-summary.cgi?originator=kolobov&closedtoo=on
 
 DESCRIPTION
 ===========
-
-A short description of each script is below.
-
-<I am planning to add more documentation, including a manpage for each script>
-
-testport
-========
-testport automates the process of testing a new port (or a port update) 
-by going through the steps recommended in the Porter's Handbook:
-- build 
-- install
-- package
-- deinstall
-
-testport stops if any errors are encountered during the process.
-
-To avoid messing up the build system, installation is done to a directory 
-inside /tmp (/tmp/${PORTNAME}), and temporary package database (/tmp/pkg_db)
-is used for the same purpose. This allows to test an update to a port already
-installed on the build system (same or previous version).
-
-testport also detects any files not listed in pkg-plist during 
-"Extra files check" phase.
-
-testport accepts the following command-line options:
-
-testport [-bipcC] [--] [<port knob(s)>]
-
--b	stop after Build phase
--i	stop after Install phase
--p	stop after Package phase
--c	do NOT run 'make clean' before the process (default to run 'make clean')
--C	do NOT run 'make clean' after the process (default to run 'make clean')
---	indicates the end of options (port's compile-time knobs follow).
-
-Examples:
-
-testport -i -C
-	build and install the port, but do not delete the installed files
-	(I use to manually examine the installed files for correctness).
-
-testport -- NOPORTDOCS=yes
-	test port without installing documentation (i.e. pass NOPORTDOCS=yes to
-	all make phases)
-	(Note: you can list as many parameters as needed)
-
-pr-new
-======
-pr-new simplifies submitting a PR with a new port.
-It automatically fills in some fields in the send-pr form,
-generates a shar file containing the port and names it properly,
-runs send-pr to actually submit PR and then saves that shar file
-for archiving purposes.
-
-Run pr-new from inside the port's directory.
-
-Fields automatically filled-in by pr-new:
-- Synopsis: [PATCH] <category>/<portname>: <port's COMMENT>
-- Severity: non-critical
-- Priority: low
-- Category: ports
-- Class: change-request
-- Release: <`uname -srp`>
-- System: <shortened output from uname -a>
-
-pr-update
-=========
-Similar to pr-new, but used for submitting port updates.
-Run from a checked-out CVS working copy of the port.
-In addition to filling out send-pr form, it automatically
-run "cvs update" first and then generates a diff against CVS.
-If you are the port's maintainer, Synopsis is prefixed with
-[MAINTAINER] tag, otherwise - with [PATCH].
-Port maintainer is also automatically CC'ed on your PR.
+Each of the scripts now has its own manual pages. Please refer to testport(1),
+pr-change(1), pr-new(1) and pr-update(1) for details.
 
 THANKS
 ======
@@ -125,5 +45,17 @@ see THANKS file for details.
 TODO
 ====
 There are some improvements planned, see TODO file for details.
+
+DISCLAIMER
+==========
+
+This program is free software; you can redistribute it and/or 
+modify it under the terms of the "BSD License" which is 
+distributed with the software in the file LICENSE.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the BSD
+License for more details.
 
 $Id$
