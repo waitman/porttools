@@ -1,3 +1,8 @@
+0.63, 2004-08-07
+- cosmetique: change man pages to my FreeBSD.org e-mail address
+- cosmetique: change copyright in README for year 2004
+- cosmetique: modify output of help command, fix wrapping
+
 0.62, 2004-07-29
 - bugfix: port test: fix logic to generate an unique PREFIX
 - bugfix: port test: DTRT when LOCALBASE == X11BASE

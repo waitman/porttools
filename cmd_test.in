@@ -98,7 +98,6 @@ fi
 
 # Collect information about the port
 PKGNAME="`make -V PKGNAME`"
-PKGPLIST="`make -V PKGPLIST`"
 
 # Create a temporary dir for temporary package database
 PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
@@ -111,12 +110,12 @@ if [ "${USE_X_PREFIX}" != "yes" ]
 then
 	# Some ports fail to build if PREFIX contains commas 
 	# (mostly due to constructs like "sed -e 's,foo,bar'")
-	# or plus signs - remove those characters from generated PREFIX
-	PREFIX="${BUILDROOT:-/tmp}/`echo ${PKGNAME} | tr -d ',+'`"
+	# or plus signs - replace them with underscore
+	PREFIX="${BUILDROOT:-/tmp}/`echo ${PKGNAME} | tr  '[,+]' _`"
 fi
 
 # Display FLAGS
-PORT_FLAGS="PREFIX=${PREFIX} PKG_DBDIR=${PKG_DBDIR} $*"
+PORT_FLAGS="PREFIX=${PREFIX} NO_DEPENDS=yes PKG_DBDIR=${PKG_DBDIR} $*"
 echo "===> flags: ${PORT_FLAGS}"
 
 # Start with a clean workspace
@@ -145,24 +144,29 @@ do
 
 		# XXX Dirty hack to avoid checking the whole
 		# LOCALBASE or X11BASE trees
-		if [ "${USE_X_PREFIX}" != "yes" ]
+		PLIST="${PKG_DBDIR}/${PKGNAME}/+CONTENTS"
+		if [ "${USE_X_PREFIX}" != "yes" -a -r ${PLIST} ]
 		then
 			# Also check ldd(1) output on binaries
 			echo "===> Checking shared library dependencies"
-	#		grep -E "(bin|exec)/" ${PKGPLIST} | \
-	#			sed -e "s,^,${PREFIX}/," | \
-	#			xargs ldd | grep '=>' | \
-	#			awk '{print $3;}' | sort -u
-			ldd ${PREFIX}/bin/* ${PREFIX}/sbin/* \
-				${PREFIX}/libexec/* /dev/null \
-				| grep '=>' | awk '{print $3;}'\
-				| sort | uniq -c
+			grep -v "^@" ${PLIST} | \
+				sed -e "s,^,${PREFIX}/," | \
+				xargs ldd 2>&1 | \
+				grep -v "not a dynamic executable" | \
+				grep '=>' | awk '{print $3;}' | sort -u
 		fi
 	fi
 
 	${SUDO} make ${PORT_FLAGS} ${PHASE}
 	if [ $? -gt 0 ]; then
-		echo "Error running make ${PHASE}"
+		echo "===> Error running make ${PHASE}"
+		if [ "${PHASE}" = "package" -a "${USE_X_PREFIX}" != "yes" ]
+		then
+			echo "===> Files currently installed in PREFIX"
+			test -d ${PREFIX} && find ${PREFIX} ! -type d | \
+				egrep -v "${PREFIX}/share/nls/(POSIX|en_US.US-ASCII)"  | \
+				sed -e "s,^${PREFIX}/,,"
+		fi
 		echo "===> Cleaning up"
 		[ "${USE_X_PREFIX}" != "yes" -a \
 		  "${PREFIX}" != "${LOCALBASE}" ] && sudo rm -rf ${PREFIX}

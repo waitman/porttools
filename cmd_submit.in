@@ -1,6 +1,6 @@
 # cmd_submit
 # Module for port(1)
-# SUMMARY: submit Problem Report (PR) with new port, or port change/update
+# SUMMARY: submit Problem Report with new port, or port change/update
 #
 # $Id$
 #

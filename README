@@ -1,6 +1,6 @@
 FreeBSD Port Tools
 
-Copyright (c) 2003 Sergei Kolobov. All rights reserved.
+Copyright (c) 2003-2004 Sergei Kolobov. All rights reserved.
 
 INTRODUCTION
 ============
@@ -16,9 +16,8 @@ port(1) front-end:
 
 FreeBSD Port Tools are available at http://sourceforge.net/projects/porttools/.
 
-NOTE: the Port Tools are currently in alpha state. 
 I would appreciate any feedback, comments or suggestions for improvement. 
-Patches are welcome.  Contact me at <sergei@kolobov.com>.
+Patches are welcome.  Contact me at <sergei@FreeBSD.org>.
 
 BACKGROUND
 ==========

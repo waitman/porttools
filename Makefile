@@ -7,7 +7,7 @@
 
 # Package name and version
 PORTNAME?=	porttools
-PORTVERSION?=	0.61
+PORTVERSION?=	0.63
 DISTNAME?=	${PORTNAME}-${PORTVERSION}
 
 PROGRAMS=	port
@@ -55,11 +55,12 @@ clean:
 ##
 ## Maintainer section
 ##
-release: ${DISTNAME}.tar.gz
+distfile: ${DISTNAME}.tar.gz
+	cp ${DISTNAME}.tar.gz /FreeBSD/distfiles
 	
-upload: ${DISTNAME}.tar.gz Makefile
+release: ${DISTNAME}.tar.gz Makefile
 	sfupload ${DISTNAME}.tar.gz
-	mv ${DISTNAME}.tar.gz /FreeBSD/distfiles
+	rm -f ${DISTNAME}.tar.gz
 
 ${DISTNAME}.tar.gz: ${PROGRAMS} ${SCRIPTS} Makefile
 	rm -rf ${DISTNAME}
