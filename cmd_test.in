@@ -109,7 +109,7 @@ PKG_DBDIR="`mktemp -d -t pkg_db`" || exit 1
 LOCALBASE="`make -V LOCALBASE`"
 X11BASE="`make -V X11BASE`"
 PREFIX="`make -V PREFIX`"
-if [ "${PREFIX}" = "${LOCALBASE}" -o "${PREFIX}" = "${X11BASE} ]
+if [ "${PREFIX}" = "${LOCALBASE}" -o "${PREFIX}" = "${X11BASE}" ]
 then
 	CLEAN_PREFIX="no"
 else
