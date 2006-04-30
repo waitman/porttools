@@ -1,3 +1,9 @@
+0.75, 2006-05-01
+- new: port commit: commit the port to FreeBSD CVS repository
+- new: port getpr: extract contents of a PR from FreeBSD GNATS database
+- new: port install: install the port
+- new: port upgrade: upgrade the port
+
 0.63, 2004-08-07
 - new: port test: add NO_DEPENDS=yes to the port test flags to prevent
   installation of dependencies into the temporary PREFIX dir

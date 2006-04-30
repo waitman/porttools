@@ -1,18 +1,22 @@
 FreeBSD Port Tools
 
-Copyright (c) 2003-2004 Sergei Kolobov. All rights reserved.
+Copyright (c) 2003-2006 Sergei Kolobov. All rights reserved.
 
 INTRODUCTION
 ============
 
 FreeBSD Port Tools consist of the several small scripts run from
 port(1) front-end:
+- port commit: commit a port into the FreeBSD Ports CVS Repository
 - port create: create a new port from a template
 - port diff: generate a diff against a previous version of the port
 - port fetch: fetch distfile(s) of a new version of the port
+- port getpr: get patch/shar from a PR
 - port help: display usage summary for port(1) commands
+- port install: install a port
 - port submit: submit a PR with new port, or port change/update
 - port test: automate testing a new port or a port update
+- port upgrade: upgrade a port
 
 FreeBSD Port Tools are available at http://sourceforge.net/projects/porttools/.
 
