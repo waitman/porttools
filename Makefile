@@ -7,12 +7,12 @@
 
 # Package name and version
 PORTNAME?=	porttools
-PORTVERSION?=	0.63
+PORTVERSION?=	0.75
 DISTNAME?=	${PORTNAME}-${PORTVERSION}
 
 PROGRAMS=	port
-SCRIPTS=	cmd_create cmd_diff cmd_fetch cmd_help \
-	 	cmd_submit cmd_test util_diff
+SCRIPTS=	cmd_commit cmd_create cmd_diff cmd_fetch cmd_getpr cmd_help \
+	 	cmd_install cmd_submit cmd_test cmd_upgrade util_diff
 DOCS=		LICENSE NEWS README THANKS TODO 
 MAN1=		port.1 
 MAN5=		porttools.5 
@@ -36,7 +36,7 @@ all: ${PROGRAMS} ${SCRIPTS} Makefile
 		inc_header.in ${.IMPSRC} > ${.TARGET}
 	chmod a+x ${.TARGET}
 
-install:
+install: ${PROGRAMS} ${SCRIPTS}
 	${BSD_INSTALL_SCRIPT} ${PROGRAMS} ${PREFIX}/bin
 	mkdir -p ${DATADIR}
 	${BSD_INSTALL_SCRIPT} ${SCRIPTS} ${DATADIR}
