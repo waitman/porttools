@@ -34,4 +34,4 @@ then
 fi
 
 # Run newfile(1)
-newfile -pport.$1
+newfile --author=${FULLNAME} --email=${EMAIL} -pport.$1
