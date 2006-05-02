@@ -70,10 +70,12 @@ else
 			# -d <dir> have been specified
 			# it should be Ports tree location
 			CATEGORY="`make -V CATEGORIES | sed -E 's/^([^ ]+).*$/\1/'`"
-			PKGNAMEPREFIX="`make -V PKGNAMEPREFIX`"
+			PYTHON_SUFFIX="`make -V PYTHON_SUFFIX`"
+			RUBY_SUFFIX="`make -V RUBY_SUFFIX`"
+			PKGNAMEPREFIX="`make -V PKGNAMEPREFIX | sed -E "s,py${PYTHON_SUFFIX}-,py-," | sed -E "s,ruby${RUBY_SUFFIX}-,ruby-,"`"
 			PKGNAMESUFFIX="`make -V PKGNAMESUFFIX`"
-			PORTNAME="`make -V PORTNAME`"
-			ORIG_DIR="${DIFF_MODE}/${CATEGORY}/${PKGNAMEPREFIX}${PORTNAME}${PKGNAMESUFFIX}"
+			PORTNAME="${PKGNAMEPREFIX}`make -V PORTNAME`${PKGNAMESUFFIX}"
+			ORIG_DIR="${DIFF_MODE}/${CATEGORY}/${PORTNAME}"
 		else 
 			# -d <pattern> have been specified
 			# <pattern> is used to determine original port location
