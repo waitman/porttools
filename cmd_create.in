@@ -6,29 +6,25 @@
 #
 
 # Check if this script is run via port(1)
-if [ "${PORTTOOLS}" = "" ]
-then
+if [ "${PORTTOOLS}" = "" ]; then
 	echo "This script should be run via port(1) front-end"
 	exit 1
 fi
 
 # Check to see if newfile(1) exists in PATH
-if [ "`which newfile`" = "" ]
-then
+if [ "`which newfile`" = "" ]; then
 	echo "newfile(1) not found - please install devel/newfile port"
 	exit 1
 fi
 
 # Check if port name was supplied
-if [ "$1" = "" ]
-then
+if [ "$1" = "" ]; then
 	echo "Error: port name not specified"
 	exit 1
 fi
 
 # Check if specified dir already exist
-if [ -e "$1" ]
-then
+if [ -e "$1" ]; then
 	echo "Error: $1 already exists"
 	exit 1
 fi
