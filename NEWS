@@ -1,6 +1,9 @@
 0.76, 2006-05-02
 - bugfix: port create: use author's name and e-mail address from ~/.porttools
   when creating a new port (PR: ports/70300, Janos Mohacsi)
+- bugfix: port submit: avoid CC'ing PRs with maintainership changes to
+  previous maintainer if the port was unmaintained - i.e. when MAINTAINER
+  is set to ports@FreeBSD.org (PR: ports/94055, Diane Bruce)
 
 0.75, 2006-05-01
 - new: port commit: commit the port to FreeBSD CVS repository
