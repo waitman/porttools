@@ -205,7 +205,6 @@ else
 		NEW_MAINTAINER="`awk '/^\+MAINTAINER/ { print $2; }' ${PATCH}`"
 		if [ "${NEW_MAINTAINER}" != "${OLD_MAINTAINER}" ]
 		then
-			CC="${OLD_MAINTAINER}"
 			case ${NEW_MAINTAINER} in
 			# New maintainer is you
 			${EMAIL})
@@ -218,6 +217,12 @@ else
 				DESCRIPTION="${DESCRIPTION}\n- Reset maintainership to ports@FreeBSD.org"
 				;;
 			esac
+
+			# CC previous port maintainer,
+			# unless it was unmaintained 
+			if [ "${OLD_MAINTAINER}" != "ports@FreeBSD.org" ]; then
+				CC="${OLD_MAINTAINER}"
+			fi
 		fi
 	else
 		# Maintainer is NOT changed
