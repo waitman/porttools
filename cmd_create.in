@@ -17,17 +17,18 @@ if [ "`which newfile`" = "" ]; then
 	exit 1
 fi
 
+PORTNAME=$1
 # Check if port name was supplied
-if [ "$1" = "" ]; then
+if [ "${PORTNAME}" = "" ]; then
 	echo "Error: port name not specified"
 	exit 1
 fi
 
 # Check if specified dir already exist
-if [ -e "$1" ]; then
-	echo "Error: $1 already exists"
+if [ -e "${PORTNAME}" ]; then
+	echo "Error: ${PORTNAME} already exists"
 	exit 1
 fi
 
 # Run newfile(1)
-newfile --author=${FULLNAME} --email=${EMAIL} -pport.$1
+newfile --author="${FULLNAME}" --email="${EMAIL}" -pport."${PORTNAME}"
