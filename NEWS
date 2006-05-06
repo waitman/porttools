@@ -1,3 +1,7 @@
+0.77, 2006-05-06
+- bugfix: port create: quote arguments passed to newfile(1) - otherwise
+  a space in FULLNAME will mess up other arguments (thanks Radim Kolar)
+
 0.76, 2006-05-02
 - bugfix: port submit: integrate patch from the ports tree: modify util_diff
   to work correctly for p5-/py-/ruby- ports (i.e. PKGNAMEPREFIX is not empty).
