@@ -37,8 +37,9 @@ then
 fi
 
 set -- $ARGS
-for i 
+while [ x"$1" != x"--" -a x"$1" != x"" ]
 do
+	i=$1
 	case "$i" in
 	# help
 	-h)

@@ -7,7 +7,7 @@
 
 # Package name and version
 PORTNAME?=	porttools
-PORTVERSION?=	0.77
+PORTVERSION?=	0.99
 DISTNAME?=	${PORTNAME}-${PORTVERSION}
 
 PROGRAMS=	port

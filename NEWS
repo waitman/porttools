@@ -1,3 +1,12 @@
+0.99, 2009-09-09
+- bugfix: Fix commandline arguments handling for some cases when two or more 
+  flags are used - e.g. `port submit -m update -d .orig` (PR: ports/100771,
+  thanks HASHI Hiroaki and Dmitry Marakasov)
+- optimization: add -R flag to cvs(1) invocation in port diff - this would
+  allow working against a local read-only repository and improve performance
+  (PR: ports/116248, thanks Xin LI)
+- update copyright notices
+
 0.77, 2006-05-06
 - bugfix: port create: quote arguments passed to newfile(1) - otherwise
   a space in FULLNAME will mess up other arguments (thanks Radim Kolar)
