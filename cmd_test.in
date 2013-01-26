@@ -2,7 +2,7 @@
 # Module for port(1)
 # SUMMARY: test port (build, install, package, deinstall)
 #
-# $Id: cmd_test.in,v 1.8 2009/09/09 19:58:30 skolobov Exp $
+# $Id$
 #
 
 # Check if this script is run via port(1)
@@ -189,7 +189,7 @@ then
 		sed -e "s,^${PREFIX}/,,"
 	sudo find ${LOCALBASE}/ -type d | sed "s,^${LOCALBASE}/,," | sort > ${PREFIX}.PLIST_DIRS.before
 	sudo find ${PREFIX}/ -type d | sed "s,^${PREFIX}/,," | sort > ${PREFIX}.PLIST_DIRS.after
-	comm -13 ${PREFIX}.PLIST_DIRS.before ${PREFIX}.PLIST_DIRS.after | sort -r | awk '{print "@dirrmtry "$0}'
+	comm -13 ${PREFIX}.PLIST_DIRS.before ${PREFIX}.PLIST_DIRS.after | sort -r | awk '{print "@dirrmtry "$1}'
 fi
 
 # Finish with a clean workspace
