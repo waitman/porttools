@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" $Id$
+.\" $Id: port.1,v 1.2 2004/08/06 21:53:54 skolobov Exp $
 .\"
 .Dd October 20, 2003
 .Dt PORT 1
@@ -125,6 +125,9 @@ select diff generation mode:
 .Bl -tag -width ".Pa suffix"
 .It CVS
 diff against CVS repository (default).
+.It CVSauto
+diff against CVS repository, no cvs add/delete required.
+Useful with read-only CVS servers that don't support add/delete.
 .It Pa dir
 diff against original version of the port in the Ports tree with root at
 .Pa dir
@@ -215,6 +218,8 @@ Synopsis:
 .Bl -tag -width ".Fl s Ar severity"
 .It Fl h
 display usage summary for this command.
+.It Fl d Ar mode
+select diff generation mode - see the port diff command above for details.
 .It Fl m Ar mode
 Overrides automatic detection of operation mode:
 .Bl -tag -width update
@@ -245,6 +250,10 @@ Default is
 Skips running
 .Xr portlint 1 .
 Using this option will generate a warning and it strongly discouraged.
+.It Fl P
+Don't send the PR.
+Just print to stdout (see -P in
+.Xr send-pr 1) .
 .El
 .It Ar test
 Automates the process of testing a new port (or a port update) 
