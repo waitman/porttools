@@ -2,7 +2,7 @@
 # Module for port(1)
 # SUMMARY: generate diff against original port version
 #
-# $Id$
+# $Id: cmd_diff.in,v 1.2 2009/09/09 19:58:30 skolobov Exp $
 #
 
 # Check if this script is run via port(1)
@@ -21,6 +21,7 @@ Usage: port diff [-h] [-d <diff mode>]
 	-h	- Display this usage summary
 	-d <diff mode> - Select diff generation mode:
 		CVS - against CVS
+		CVSauto - against CVS, no cvs add/delete required
 		<dir> - against Ports tree in <dir>
 		<pattern> - against original port in <pwd><pattern>
 EOF

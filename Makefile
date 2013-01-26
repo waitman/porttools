@@ -2,13 +2,22 @@
 #
 # Makefile
 # 
-# $Id$
+# $Id: Makefile,v 1.24 2009/09/09 19:58:30 skolobov Exp $
 # 
 
 # Package name and version
 PORTNAME?=	porttools
 PORTVERSION?=	0.99
 DISTNAME?=	${PORTNAME}-${PORTVERSION}
+.if defined(PORTREVISION) && defined(PORTEPOCH)
+VERSIONSTRING=	${PORTVERSION}_${PORTREVISION},${PORTEPOCH}
+.elif defined(PORTREVISION)
+VERSIONSTRING=	${PORTVERSION}_${PORTREVISION}
+.elif defined(PORTEPOCH)
+VERSIONSTRING=	${PORTVERSION},${PORTEPOCH}
+.else
+VERSIONSTRING=	${PORTVERSION}
+.endif
 
 PROGRAMS=	port
 SCRIPTS=	cmd_commit cmd_create cmd_diff cmd_fetch cmd_getpr cmd_help \
@@ -31,8 +40,8 @@ all: ${PROGRAMS} ${SCRIPTS} Makefile
 
 .SUFFIXES: .in
 
-.in: 
-	sed -e 's,__VERSION__,${PORTVERSION},;s,__PREFIX__,${PREFIX},' \
+.in:
+	sed -e 's%__VERSION__%${VERSIONSTRING}%;s,__PREFIX__,${PREFIX},' \
 		inc_header.in ${.IMPSRC} > ${.TARGET}
 	chmod a+x ${.TARGET}
 

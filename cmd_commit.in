@@ -2,7 +2,7 @@
 # Module for port(1)
 # SUMMARY: commit a port into the FreeBSD Ports CVS Repository
 #
-# $Id$
+# $Id: cmd_commit.in,v 1.2 2009/09/09 19:58:30 skolobov Exp $
 #
 
 # Check if this script is run via port(1)
